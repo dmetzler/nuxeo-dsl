@@ -5,6 +5,37 @@
 
 This is a toy project playing with [Chevrotain](https://github.com/SAP/chevrotain) to create a Nuxeo Domain Specific language. The idea is to create an interpreter that create Java descriptor thru Nashorm and an online editor with visual rendition of the domain model (UML style).
 
+
+A document could be defined like this:
+                
+        document Department extends Document {
+           schemas {
+              common
+              resource
+              dublincore
+              //Inline declaration of a schema
+              department with prefix dpt { id long, name }
+           }
+           
+           alias {
+              // Aliases are a way to provide an indirection to
+              // the physical property or to a query.
+              created_at prop dc:created
+              modified_at prop dc:modified
+              allEmployee query "SELECT * FROM Employee WHERE emp:deptId = '$this.id'"
+           }              
+        }
+
+
+Some advantages of this strategy:
+
+  * Simpler and clearer syntax to define the model
+  * With a parser, the syntax can be checked
+  * As it's JS it can be used server side or developer side.
+  * Can add new featrures like alias that could be useful for a GraphQL server
+  * ...
+
+
 # Licensing
 
 Most of the source code in the Nuxeo Platform is copyright Nuxeo and
