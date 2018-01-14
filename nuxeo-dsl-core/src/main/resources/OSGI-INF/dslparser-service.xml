@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.dsl.parser.DslParser" version="1.0">
+
+  <implementation class="org.nuxeo.dsl.parser.DslParserImpl" />
+
+  <service>
+    <provide interface="org.nuxeo.dsl.parser.DslParser" />
+  </service>
+</component>

@@ -1,0 +1,20 @@
+{
+    "name": "nuxeo_dsl_grammar",
+    "version": "0.0.1",
+    "scripts": {
+        "test": "mocha \"*spec.js\""
+    },
+    "dependencies": {
+        "babel": "^6.23.0",
+        "babel-core": "^6.26.0",
+        "babel-standalone": "^6.26.0",
+        "chevrotain": "*",
+        "nashorn-babel-polyfill": "^0.2.7"
+    },
+    "devDependencies": {
+        "chai": "^4.1.2",
+        "gulp": "^4.0.0",
+        "mocha": "^3.5.3"
+    },
+    "private": true
+}
