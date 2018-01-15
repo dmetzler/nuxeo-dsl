@@ -10,7 +10,7 @@
         // Browser globals (root is window)\
         root["nuxeo_dsl"] = factory(root.chevrotain)
     }
-})(global, function(chevrotain) {
+})(this, function(chevrotain) {
 
   const createToken = chevrotain.createToken
 

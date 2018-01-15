@@ -57,7 +57,7 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
 			importJs(engine, "js/lib/chevrotain.min.js");
 			importES(engine, "js/nuxeo_dsl.js");
 			importES(engine, "js/nuxeo_dsl_javainterpreter.js");
-			engine.eval("var parse = function(dsl) { return global.nuxeo_dsl_javainterpreter.parse(dsl)}");
+			engine.eval("var parse = function(dsl) { return nuxeo_dsl_javainterpreter.parse(dsl)}");
 			log.info("DSL compilator compiled");
 		} catch (ScriptException | FileNotFoundException e) {
 

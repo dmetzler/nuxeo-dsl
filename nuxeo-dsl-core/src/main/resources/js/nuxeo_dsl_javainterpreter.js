@@ -10,7 +10,7 @@
         // Browser globals (root is window)\
         root["nuxeo_dsl_javainterpreter"] = factory(root.chevrotain,root.global.nuxeo_dsl)
     }
-})(global, function(chevrotain, nuxeo_dsl) {
+})(this, function(chevrotain, nuxeo_dsl) {
 
 	const parser = new nuxeo_dsl.NuxeoDSLParser([]);
 	const NuxeoLexer = nuxeo_dsl.NuxeoLexer;
