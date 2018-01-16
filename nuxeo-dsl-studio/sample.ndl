@@ -1,1 +1,15 @@
-doctype NewType extends Document {}
+doctype NewType extends Document {
+  schemas {
+    common
+    dublincore lazy
+    myschema
+  }
+}
+
+doctype OtherType extends Document {
+  schemas {
+    common
+    dublincore lazy
+    bla
+  }
+}

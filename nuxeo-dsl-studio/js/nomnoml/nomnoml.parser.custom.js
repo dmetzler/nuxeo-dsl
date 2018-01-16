@@ -26,11 +26,12 @@ nomnoml.parse = function (source){
 }
 
 nomnoml.intermediateParse = function (source){
-	return nomnoml.convertToNomnoml(JDLParser.parse(source));
+	return nomnoml.convertToNomnoml(nuxeo_dsl.parse(source).value);
 }
 
-nomnoml.convertToNomnoml = function(JDLObj){
-	var parts = [], enumParts = []
+
+nomnoml.convertToNomnoml = function(NDLObj){
+	var parts = [ ], enumParts = []
 	var required = function (line){ return line.key === 'required' }
 	var isRequired = function (validations) {
 		return _.filter(validations, required).length > 0
@@ -70,8 +71,8 @@ nomnoml.convertToNomnoml = function(JDLObj){
 				attrs.push(a)
 			})
 		} else {
-			_.each(entity.body, function (a) {
-				attrs.push(a.name + ': ' + a.type + (isRequired(a.validations) ? '*' : ''))
+			_.each(entity.schemas, function (a) {
+				attrs.push( a.name)
 			})
 		}
 		return {
@@ -83,7 +84,7 @@ nomnoml.convertToNomnoml = function(JDLObj){
 			]
 		}
 	}
-	_.each(JDLObj.enums, function (p){
+	_.each(NDLObj.enums, function (p){
 		if (p.name){ // is an enum
 			var part = setParts(p, true)
 			parts.push(part)
@@ -91,17 +92,25 @@ nomnoml.convertToNomnoml = function(JDLObj){
 		}
 	})
 
-	_.each(JDLObj.entities, function (p){
-		if (p.name){ // is a classifier
+	_.each(NDLObj.doctypes, function (p){
+		if (p.name){ // is a doctype
 			var part = setParts(p)
 			parts.push(part)
-			_.each(p.body, function (a) {
-				setEnumRelation(a, part)
+
+		}
+
+		if (p.extends){
+			parts.push({
+			  assoc: '--:>',
+			  start: setParts(p),
+			  end: setParts({name:p.extends}),
+			  startLabel: '',
+			  endLabel: ''
 			})
 		}
 	})
 
-	_.each(JDLObj.relationships, function (p){
+	_.each(NDLObj.relationships, function (p){
 		parts.push({
 			assoc: '->',
 			start: setParts(p.from),
@@ -119,11 +128,12 @@ nomnoml.transformParseIntoSyntaxTree = function (entity){
 
 	var relationId = 0
 
-	function transformCompartment(parts){
+	function transformCompartment(parts){		
 		var lines = []
 		var rawClassifiers = []
 		var relations = []
 		_.each(parts, function (p){
+			
 			if (typeof p === 'string')
 				lines.push(p)
 			if (p.assoc){ // is a relation
@@ -141,7 +151,7 @@ nomnoml.transformParseIntoSyntaxTree = function (entity){
 			if (p.parts){ // is a classifier
 				rawClassifiers.push(p)
             }
-		})
+        })
 		var allClassifiers = _.map(rawClassifiers, transformItem)
 		var noDuplicates = _.map(_.groupBy(allClassifiers, 'name'), function (cList){
 			return _.max(cList, function (c){ return c.compartments.length })
