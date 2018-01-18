@@ -10,7 +10,7 @@
         // Browser globals (root is window)\
         root["nuxeo_dsl"] = factory(root.chevrotain)
     }
-})(this, function(chevrotain) {
+})(global, function(chevrotain) {
 
   const createToken = chevrotain.createToken
 
@@ -97,7 +97,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
                     $.CONSUME1(RCurly)
               })
           })
-          
+
           $.RULE("schemaList", () => {
             $.CONSUME(Schemas)
             $.CONSUME2(LCurly)
@@ -120,7 +120,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
 
 
-          
+
           $.RULE("schemaRef", ()=> {
             $.CONSUME(Identifier)
             $.OPTION(()=> {
@@ -137,22 +137,22 @@ class NuxeoDSLParser extends chevrotain.Parser {
               $.CONSUME(Facet)
               $.CONSUME(Identifier)
               $.OPTION2(() => {
-                $.CONSUME(LCurly)                    
+                $.CONSUME(LCurly)
                    $.SUBRULE($.schemaList)
                 $.CONSUME1(RCurly)
               })
           })
-          
-          
+
+
           $.RULE("schema", ()=> {
             $.CONSUME(Schema)
             $.CONSUME(Identifier)
             $.SUBRULE2($.schemaBody)
-            
-          })
-          
 
-      $.RULE("schemaBody", ()=> { 
+          })
+
+
+      $.RULE("schemaBody", ()=> {
             $.CONSUME(LCurly)
             $.OPTION(() => {
                 $.SUBRULE($.fieldDescriptor)
@@ -174,7 +174,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
           $.RULE("fieldType", () => {
             $.CONSUME(Identifier)
-          })          
+          })
 
           chevrotain.Parser.performSelfAnalysis(this)
       }
@@ -202,11 +202,11 @@ class NuxeoDSLParser extends chevrotain.Parser {
         if (ctx.doctype.length > 0) {
           result.doctypes = ctx.doctype.map((type) => {
             let doctype = this.visit(type)
-           
+
             if(doctype.schemas) {
               let schemas = this.extractInlineSchemas(doctype)
-            
-              schemas.forEach((schema)=>{ 
+
+              schemas.forEach((schema)=>{
                 result.schemas = result.schemas || []
                 result.schemas.push(schema)
               })
@@ -231,7 +231,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
           if(schema.hasOwnProperty("fields")) {
             inlineSchema.push(schema)
             doctype.schemas = doctype.schemas.filter((s)=>s.name !== schema.name)
-            doctype.schemas.push({name: schema.name, lazy: schema.lazy})            
+            doctype.schemas.push({name: schema.name, lazy: schema.lazy})
           }
         })
         return inlineSchema
@@ -249,7 +249,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
         }
 
         if(ctx.schemaList.length > 0) {
-          doctype.schemas = this.visit(ctx.schemaList)          
+          doctype.schemas = this.visit(ctx.schemaList)
         }
 
 
@@ -261,27 +261,27 @@ class NuxeoDSLParser extends chevrotain.Parser {
       schemaList(ctx) {
         if(ctx.schemaRef.length > 0) {
            return ctx.schemaRef.map((schema) => this.visit(schema))
-        } else {        
+        } else {
           return []
         }
       }
 
       schemaRef(ctx) {
-        let result = { 
-          name: ctx.Identifier[0].image, 
+        let result = {
+          name: ctx.Identifier[0].image,
           lazy: ctx.Lazy.length > 0
         }
 
         if(ctx.schemaBody.length > 0) {
           result.fields = this.visit(ctx.schemaBody)
-          result.prefix = "" 
+          result.prefix = ""
         }
         return result
       }
 
       schema(ctx) {
         let result = {
-            name: ctx.Identifier[0].image, 
+            name: ctx.Identifier[0].image,
             fields: this.visit(ctx.schemaBody),
             prefix: ""
         }
@@ -290,9 +290,9 @@ class NuxeoDSLParser extends chevrotain.Parser {
       }
 
 
-      facet(ctx) {            
+      facet(ctx) {
         let facet = {
-          name: ctx.Identifier[0].image,          
+          name: ctx.Identifier[0].image,
         }
 
         if(ctx.schemaList.length > 0) {
@@ -312,7 +312,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
                       map[field.name] = {type: field.type}
                       return map
                     },{})
-        
+
       }
 
       fieldDescriptor(ctx) {
