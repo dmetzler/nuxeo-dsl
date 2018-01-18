@@ -1,13 +1,13 @@
 package org.nuxeo.dsl.parser;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
-
-import java.util.Collection;
-import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.common.xmap.XMap;
+import org.nuxeo.dsl.DslModel;
+import org.nuxeo.dsl.features.DocumentTypeFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.schema.DocumentTypeDescriptor;
 import org.nuxeo.ecm.platform.test.PlatformFeature;
@@ -23,31 +23,39 @@ import com.google.inject.Inject;
 @Deploy("org.nuxeo.dsl.nuxeo-dsl-core")
 public class TestDslParser {
 
-	@Inject
-	protected DslParser dslparser;
+    @Inject
+    protected DslParser dslparser;
 
-	@Inject
-	protected CoreSession session;
+    @Inject
+    protected CoreSession session;
 
-	@Inject
-	ReloadService reload;
+    @Inject
+    ReloadService reload;
 
-	@Test
-	public void it_can_retrieve_the_service() {
-		assertNotNull(dslparser);
-	}
+    @Test
+    public void it_can_retrieve_the_service() {
+        assertNotNull(dslparser);
+    }
 
-	@Test
-	public void it_can_parse_a_dsl() throws Exception {
-
-
-		Collection<Object> descriptors = dslparser.parse("doctype NewType {}");
-		List<DocumentTypeDescriptor> docctypes = (List<DocumentTypeDescriptor>) descriptors.iterator().next();
+    @Test
+    public void it_can_parse_a_dsl() throws Exception {
 
 
-		assertEquals("NewType", docctypes.get(0).name);
+        DslModel model = dslparser.parse("doctype NewType {}");
+        DocumentTypeFeature feature = model.getFeature(DocumentTypeFeature.class);
+
+        assertThat(feature.getDocTypes()).hasSize(1);
+
+
+        DocumentTypeDescriptor descriptor = feature.getDocTypes().get(0);
+        assertThat(descriptor.name).isEqualTo("NewType");
+        assertThat(descriptor.superTypeName).isEqualTo("Document");
+        XMap xmap = new XMap();
+        xmap.register(DocumentTypeDescriptor.class);
+        System.out.println(xmap.toXML(descriptor ));
 
 
 
-	}
+
+    }
 }

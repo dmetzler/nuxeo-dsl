@@ -12,6 +12,7 @@
     }
 })(global, function(chevrotain, nuxeo_dsl) {
 
+
 	const parser = new nuxeo_dsl.NuxeoDSLParser([]);
 	const NuxeoLexer = nuxeo_dsl.NuxeoLexer;
 

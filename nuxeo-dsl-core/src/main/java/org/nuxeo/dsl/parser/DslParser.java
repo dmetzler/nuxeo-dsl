@@ -2,7 +2,9 @@ package org.nuxeo.dsl.parser;
 
 import java.util.Collection;
 
+import org.nuxeo.dsl.DslModel;
+
 public interface DslParser {
 
-	Collection<Object> parse(String dsl);
+	DslModel parse(String dsl);
 }

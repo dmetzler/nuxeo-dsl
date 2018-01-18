@@ -12,6 +12,7 @@
     }
 })(global, function(chevrotain) {
 
+
   const createToken = chevrotain.createToken
 
   const DocType = createToken({name: "DocType", pattern: /doctype/, label: 'docType'});
