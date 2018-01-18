@@ -22,6 +22,7 @@
       canvasTools = document.getElementById('canvas-tools'),
       defaultSource,
       fileName,
+      inputEditorMarkers = [],
       zoomLevel = 0,
       offset = {
         x: 0,
@@ -369,39 +370,114 @@
     }
 
     function sourceChanged() {
-      try {
-        $scope.safeApply(function () {
-          app.lineMarkerTop = -35;
-          app.hasError = false;
-          app.errorTooltip = '';
-        });
-        var superSampling = window.devicePixelRatio || 1;
-        var scale = superSampling * Math.exp(zoomLevel / 10);
+      $scope.safeApply(function () {
+        app.lineMarkerTop = -35;
+        app.hasError = false;
+        app.errorTooltip = '';
+      });
+      var superSampling = window.devicePixelRatio || 1;
+      var scale = superSampling * Math.exp(zoomLevel / 10);
 
-        var model = nomnoml.draw(canvasElement, currentText(), scale);
-        positionCanvas(canvasElement, superSampling, offset);
-        setFilename(model.config.title);
-        storage.save(currentText());
-      } catch (e) {
-        handleError(e);
-      }
+      var model = nomnoml.draw(canvasElement, currentText(), scale);
+      positionCanvas(canvasElement, superSampling, offset);
+      setFilename(model.config.title);
+      storage.save(currentText());
+
+
+      markInputErrors(model.lexerErrors,model.parserErrors)
+      handleError(model.errors);
+
+
+    
     }
 
-    function handleError(e) {
-      var msg = '',
-        top = 0;
-      if (e.location) {
+
+    function markInputErrors(lexErrors, parseErrors) {
+        var start, end, marker
+        _.forEach(inputEditorMarkers, function (currMarker) {
+            currMarker.clear()
+        })
+        inputEditorMarkers = []
+
+        _.forEach(lexErrors, function (currLexError) {
+            start = {line: currLexError.line - 1, ch: currLexError.column - 1}
+            end = {
+                line: currLexError.line - 1,
+                ch  : currLexError.column - 1 + currLexError.length
+            }
+
+            $scope.$broadcast('CodeMirror', function(cm){
+              marker = cm.markText(start, end, {
+                className: "markTextError",
+                title    : currLexError.message
+              })              
+              inputEditorMarkers.push(marker)
+            })
+            
+        })
+
+        _.forEach(parseErrors, function (currParserError) {
+            start = {
+                line: currParserError.token.startLine - 1,
+                ch  : currParserError.token.startColumn - 1
+            }
+
+            var lastToken = currParserError.token
+            if (!_.isEmpty(currParserError.resyncedTokens)) {
+                lastToken = _.max(currParserError.resyncedTokens, function(tok) {
+                    return tok.startOffset
+                })
+            }
+
+            end = {
+                line: lastToken.endLine ?
+                    lastToken.endLine - 1 :
+                    // assume startLine === endLine if we endLine is not tracked
+                    lastToken.startLine - 1,
+                ch  : lastToken.endColumn ?
+                    lastToken.endColumn :
+                    // compute the endColumn ourselves
+                    lastToken.startColumn + lastToken.image.length
+            }
+            
+            $scope.$broadcast('CodeMirror', function(cm){
+              marker = cm.markText(start, end, {
+                className: "markTextError",
+                title    : currParserError.message
+              })              
+              inputEditorMarkers.push(marker)
+            })
+
+            
+        })
+    }
+
+    function handleError(errors) {
+      if(errors.length > 0) {
+        var msg = '',
+            top = 0;
+        
+        var e = errors[0]
+
         var lineHeight = parseFloat($(editorElement).css('line-height'));
-        top = 35 + lineHeight * e.location.start.line;
-        msg = e.message + ' -> line: ' + e.location.start.line;
-      } else {
-        throw e;
+        top = 35 + lineHeight * (e.token.startLine );
+        msg = e.message + ' -> line: ' + e.token.startLine;
+        /*var msg = '',
+          top = 0;
+        if (e.location) {
+          var lineHeight = parseFloat($(editorElement).css('line-height'));
+          top = 35 + lineHeight * e.location.start.line;
+          msg = e.message + ' -> line: ' + e.location.start.line;
+        } else {
+          throw e;
+        }*/
+
+        $scope.safeApply(function() {
+          app.lineMarkerTop = top;
+          app.hasError = true;
+          app.errorTooltip = msg;
+        });
       }
-      $scope.safeApply(function() {
-        app.lineMarkerTop = top;
-        app.hasError = true;
-        app.errorTooltip = msg;
-      });
     }
   }
 })();

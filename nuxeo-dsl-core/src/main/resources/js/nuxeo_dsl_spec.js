@@ -76,10 +76,66 @@ describe("Nuxeo DSL", () => {
                 ]
             })
         })
+      it("Can be inlined", () => {
+            let inputText =
+                "doctype myDoc {" +
+                "\r\n   schemas {" +
+                "\r\n      custom {prop1 String, prop2 , prop3 Integer }" +
+                "\r\n   }" +
+                "\r\n}"
+            let result = parse(inputText)
+
+            expect(result.value).to.deep.equal({
+                doctypes: [
+                  {
+                        name:"myDoc",
+                        extends: "Document",
+                        schemas: [                              
+                              {
+                                name: "custom", 
+                                lazy: false                                
+                            }
+                        ]
+
+                  }
+                ],
+                schemas: [
+                  {
+                        name:"custom",
+                        lazy: false,
+                        prefix: "",
+                        fields:{
+                              prop1: { type: "String"},
+                              prop2: { type: "String"},
+                              prop3: { type: "Integer"}
+                        }
+                  }
+                ]
+            })
+        })
+
 
     })
 
     context("Facets definition", () => {
+        it("Can be defined", () => {
+            let inputText =
+                "facet myFacet { schemas { dublincore, picture }}"
+            let result = parse(inputText)
+
+            expect(result.value).to.deep.equal({
+                facets: [
+                    {
+                        name:"myFacet",
+                        schemas:[
+                              {name: "dublincore", lazy: false},
+                              {name: "picture", lazy: false},
+                        ]
+                  }
+                ]
+            })
+        })
+
     })
 
     context("Page Providers", () => {

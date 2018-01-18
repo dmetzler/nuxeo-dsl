@@ -20,13 +20,33 @@ nomnoml.parse = function (source){
 		}
 	}))
 	var pureDiagramCode = _.map(_.pluck(lines, 'text'), onlyCompilables).join('\n').trim()
-	var ast = nomnoml.transformParseIntoSyntaxTree(nomnoml.intermediateParse(pureDiagramCode))
+	var parsed = nomnoml.intermediateParse(source)
+	var ast = nomnoml.transformParseIntoSyntaxTree(parsed.value)
 	ast.directives = directives
+	ast.errors = parsed.errors
+	ast.parserErrors = parsed.parserErrors
+	ast.lexerErrors = parsed.lexerErrors
+
 	return ast
 }
 
 nomnoml.intermediateParse = function (source){
-	return nomnoml.convertToNomnoml(nuxeo_dsl.parse(source).value);
+	var lexResult = nuxeo_dsl.NuxeoLexer.tokenize(source)
+	var parser = new nuxeo_dsl.NuxeoDSLParser([])
+	var interpreter = new nuxeo_dsl.NuxeoInterpreter()
+
+	
+	parser.input = lexResult.tokens
+	var parsed = parser.NuxeoDSL()
+
+	
+	return { 
+		value:nomnoml.convertToNomnoml(interpreter.visit(parsed)),
+		errors: parser.errors,
+		parserErrors: parser.errors,
+		lexerErrors: lexResult.errors
+	};
+
 }
 
 
@@ -64,19 +84,19 @@ nomnoml.convertToNomnoml = function(NDLObj){
 				return '1-*'
 		}
 	}
-	var setParts = function (entity, isEnum) {
+	var setParts = function (entity, isSchema) {
 		var attrs = []
-		if(isEnum){
-			_.each(entity.values, function (a) {
-				attrs.push(a)
+		if(isSchema){
+			_.forOwn(entity.fields, function (value,name) {
+				attrs.push([name, value.type].join(" "))
 			})
 		} else {
 			_.each(entity.schemas, function (a) {
-				attrs.push( a.name)
+				attrs.push( a.name)				
 			})
 		}
 		return {
-			type: isEnum ? 'ENUM' : 'CLASS',
+			type: isSchema ? 'SCHEMA' : 'DOCUMENT',
 			id: entity.name,
 			parts:[
 				[entity.name],
@@ -84,14 +104,7 @@ nomnoml.convertToNomnoml = function(NDLObj){
 			]
 		}
 	}
-	_.each(NDLObj.enums, function (p){
-		if (p.name){ // is an enum
-			var part = setParts(p, true)
-			parts.push(part)
-			enumParts.push(part)
-		}
-	})
-
+	
 	_.each(NDLObj.doctypes, function (p){
 		if (p.name){ // is a doctype
 			var part = setParts(p)
@@ -108,6 +121,16 @@ nomnoml.convertToNomnoml = function(NDLObj){
 			  endLabel: ''
 			})
 		}
+	})
+
+
+	_.each(NDLObj.schemas, function (p){
+		if (p.name){ // is a doctype
+			var part = setParts(p, true)
+			parts.push(part)
+
+		}
+		
 	})
 
 	_.each(NDLObj.relationships, function (p){

@@ -1,9 +1,9 @@
 var nomnoml = nomnoml || {}
 
 nomnoml.Classifier = function (type, name, compartments){
-	if (type === 'ENUM'){
+	if (type === 'SCHEMA'){
 		var enumLabel = _.cloneDeep(compartments[0]),
-		label = '<<enumeration>>'
+		label = '<<schema>>'
 		enumLabel.lines[0] = label
 		compartments.unshift(enumLabel)
 	}

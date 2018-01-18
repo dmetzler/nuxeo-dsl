@@ -50,7 +50,12 @@ var nomnoml = nomnoml || {};
 		fitCanvasSize(canvas, layout, config.zoom * scale);
 		config.zoom *= scale;
 		nomnoml.render(graphics, config, layout, measurer.setFont);
-		return { config: config };
+		return { 
+			config: config,
+			errors: ast.errors,
+			parserErrors: ast.parserErrors,
+			lexerErrors: ast.lexerErrors
+		 };
 	}
 
 	nomnoml.draw = function (canvas, code, scale) {

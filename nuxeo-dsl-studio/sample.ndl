@@ -1,15 +1,24 @@
 doctype NewType extends Document {
   schemas {
-    common
-    dublincore lazy
-    myschema
+  	common dublincore lazy picture
+    bal
+    toto { myprop, ddd }   
   }
+  
 }
+
+error handling
+
+doctype NewType2 {}
+
+doctype Other extends NewType {}
 
 doctype OtherType extends Document {
   schemas {
-    common
+  	common
     dublincore lazy
-    bla
-  }
+    custom { prop1, prop2 Integer}    
+  }  
 }
+
+schema mySchema {prop1 String, prop2 , prop3 Integer }

@@ -33,6 +33,7 @@ nomnoml.render = function (graphics, config, compartment, setFont){
 	function textStyle(node, line){
 		if (node.type !== 'ENUM' && line > 0 || line > 1) return {}
 		return {
+			SCHEMA: { italic: true, center: true},
 			CLASS: { bold: true, center: true },
 			ENUM: { bold: true, center: true },
 			LABEL: {},
