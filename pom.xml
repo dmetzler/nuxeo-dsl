@@ -84,7 +84,12 @@
         <groupId>org.nuxeo.dsl</groupId>
         <artifactId>nuxeo-dsl-package</artifactId>
         <version>${project.version}</version>
-      </dependency>      
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.dsl</groupId>
+        <artifactId>nuxeo-dsl-web</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
