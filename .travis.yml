@@ -1,10 +1,10 @@
 language: java
 jdk:
   - oraclejdk8
-before_script:
-  - npm install -g gulp-cli
-  - npm install -g bower
-script: "mvn verify"
+install:
+  - npm install -g gulp
+  - npm install --save-dev gulp
+  - npm install --global gulp-cli bower
 sudo: false
 cache:
   directories:
