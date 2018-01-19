@@ -20,7 +20,7 @@ const bowerLibFiles = require('main-bower-files');
 const lib = require('./lib');
 
 const images = ['img/**/*.png']
-const extras = ['favicon.ico','sample.ndl','partials','img']
+const extras = ['favicon.ico','sample.ndl','partials/**/*','img/**/*']
 
 
 const config = {
@@ -42,7 +42,8 @@ var DIST = 'target/classes/web/nuxeo.war/dslstudio';
 gulp.task('clean', () => del([config.dist], { dot: true }));
 
 gulp.task('extras', ['clean'], function() {
-    gulp.src(extras) 
+    gulp.src(extras, { base: '.'}) 
+        .pipe(print())
         .pipe(gulp.dest( DIST ));
 });
 
