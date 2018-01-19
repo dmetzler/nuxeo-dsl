@@ -56,13 +56,6 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
         }
     }
 
-    private static void importES(ScriptEngine engine, String file) throws ScriptException {
-        String unTranspiledJsx = Utilities.readFromResourcesAsString(file);
-        engine.put("input", unTranspiledJsx);
-        String transpileJavaScript = (String) engine.eval("Babel.transform(input, { presets: ['es2015'] }).code");
-        engine.eval(transpileJavaScript);
-    }
-
     /**
      * @param engine
      * @param string
@@ -74,7 +67,6 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
         InputStream is = getClass().getResourceAsStream(file);
         engine.eval(new InputStreamReader(is));
     }
-
 
     /**
      * Component deactivated notification. Called before a component is unregistered. Use this method to do cleanup if
