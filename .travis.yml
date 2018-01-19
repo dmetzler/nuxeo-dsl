@@ -1,5 +1,9 @@
 language: java
 jdk:
   - oraclejdk8
-script: "mvn verify"
+script: "npm installl -g gulp && npm install -g bower && mvn verify"
 sudo: false
+cache:
+  directories:
+  - $HOME/.m2
+  - node_modules
