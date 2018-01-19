@@ -23,11 +23,11 @@
   </appender>
 
   <category name="org.quartz">
-  	<priority value="ERROR"/>
+    <priority value="ERROR"/>
   </category>
 
-  <category name="org.nuxeo.dsl.parser">
-  	<priority value="INFO"/>
+  <category name="org.nuxeo.dsl">
+    <priority value="INFO"/>
   </category>
 
   <category name="org.nuxeo">

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.nuxeo.dslstudio.ui.actions">
+
+  <extension target="org.nuxeo.ecm.platform.actions.ActionService"
+    point="actions">
+
+    <action id="dslstudio" link="dslstudio" label="DSLStudio" order="90" type="bare_link">
+      <category>MAIN_TABS</category>
+    </action>
+
+  </extension>
+</component>

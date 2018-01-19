@@ -11,6 +11,7 @@ const gulp = require("gulp"),
     inject = require('gulp-inject'),
     babel = require('gulp-babel'),
     del = require('del'),
+    print = require('gulp-print'),
     browserSync = require('browser-sync').create(),
     reload      = browserSync.reload;
 
@@ -18,8 +19,12 @@ const bowerLibFiles = require('main-bower-files');
 
 const lib = require('./lib');
 
+const images = ['img/**/*.png']
+const extras = ['favicon.ico','sample.ndl','partials','img']
+
+
 const config = {
-    dist: 'dist/'
+    dist: 'target/classes/web/nuxeo.war/ui/'
 }
 
 const babelTask = lazypipe()
@@ -31,9 +36,18 @@ const jsTask = lazypipe()
 const cssTask = lazypipe()
     .pipe(cssnano);
 
+var DIST = 'target/classes/web/nuxeo.war/dslstudio';
+
+
 gulp.task('clean', () => del([config.dist], { dot: true }));
 
-gulp.task('build', ['clean', 'inject'], () => {
+gulp.task('extras', ['clean'], function() {
+    gulp.src(extras) 
+        .pipe(gulp.dest( DIST ));
+});
+
+
+gulp.task('build', ['clean', 'inject','extras'], () => {
     const manifest = gulp.src('.tmp/rev-manifest.json');
 
     return gulp.src('index-dev.html')
@@ -44,12 +58,14 @@ gulp.task('build', ['clean', 'inject'], () => {
             lazypipe().pipe(() => gulpIf('bower_components/nuxeodsl_parser/index.js', babelTask())),
             initTask
         ))
-        .pipe(gulpIf('*.js', jsTask()))
+        //Todo find a way to exclude nuxeo_dsl or make nuxeo_dsl uglifiable
+        //.pipe(gulpIf('*.js', jsTask()))
+        .pipe(gulpIf('*.png', print()))
         .pipe(gulpIf('*.css', cssTask()))
         .pipe(gulpIf('**/*.!(html)', rev()))
         .pipe(revReplace({manifest: manifest}))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(''));
+        .pipe(gulp.dest(DIST));
 });
 
 gulp.task('inject', () => {
@@ -79,6 +95,18 @@ gulp.task('serve', ['inject'], () => {
     gulp.watch("codemirror/*").on("change", reload);
     gulp.watch("nomnoml/*").on("change", reload);
     gulp.watch("css/*.css").on("change", reload);
+});
+
+
+gulp.task('serve-dist', ['build'], () => {
+
+    // Serve files from the root of this project
+    browserSync.init({
+        server: {
+            baseDir: "./" + DIST,
+            index: "index.html"
+        }
+    });
 });
 
 gulp.task('default', () => {

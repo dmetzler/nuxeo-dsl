@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-Vendor: Nuxeo
+Nuxeo-RequiredBy: org.nuxeo.ecm.war
+Bundle-Version: 0.0.1
+Bundle-Name: Nuxeo DSL Studio
+Bundle-ManifestVersion: 1
+Bundle-SymbolicName: org.nuxeo.dsl.studio;singleton:=true
+Nuxeo-Component: OSGI-INF/auth-contrib.xml,
+  OSGI-INF/actions-contrib.xml,
+  OSGI-INF/login-startup-page-web-contrib.xml

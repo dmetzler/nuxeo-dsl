@@ -2,8 +2,8 @@ package org.nuxeo.dsl.parser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import javax.script.Invocable;
@@ -41,25 +41,18 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
         engine = new ScriptEngineManager().getEngineByName("nashorn");
         try {
             // Nashorn polyfill
-            importJs(engine, "js/lib/global-polyfill.js");
-            importJs(engine, "js/lib/chevrotain.min.js");
+            importJs(engine, "/js/lib/global-polyfill.js");
+            importJs(engine, "/js/lib/chevrotain.min.js");
 
-            File compiledJS = getFile("js/dist/nuxeo_dsl.js");
-            if (compiledJS != null && compiledJS.exists()) {
-                importJs(engine, "js/dist/nuxeo_dsl.js");
-                importJs(engine, "js/dist/nuxeo_dsl_javainterpreter.js");
-            } else {
-                log.info("Transpiling parser (babel)");
-                importJs(engine, "js/lib/babel.min.js");
-                importES(engine, "js/nuxeo_dsl.js");
-                importES(engine, "js/nuxeo_dsl_javainterpreter.js");
-            }
+            importJs(engine, "/js/nuxeo_dsl.js");
+            importJs(engine, "/js/nuxeo_dsl_javainterpreter.js");
 
             engine.eval("var parse = function(dsl) { return global.nuxeo_dsl_javainterpreter.parse(dsl)}");
             log.info("DSL compilator compiled");
         } catch (ScriptException | FileNotFoundException e) {
-            log.error(e);
-            throw new NuxeoException("Unable to compile DSL compilator", e);
+
+            log.error("Unable to compile DSL compilator", e);
+            throw new NuxeoException(e);
         }
     }
 
@@ -77,15 +70,11 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
      * @throws FileNotFoundException
      * @since TODO
      */
-    private static void importJs(ScriptEngine engine, String file) throws FileNotFoundException, ScriptException {
-        File f = getFile(file);
-        engine.eval(new FileReader(f));
+    private void importJs(ScriptEngine engine, String file) throws FileNotFoundException, ScriptException {
+        InputStream is = getClass().getResourceAsStream(file);
+        engine.eval(new InputStreamReader(is));
     }
 
-    private static File getFile(String file) {
-        URL lib = DslParserImpl.class.getClassLoader().getResource(file);
-        return lib != null ? new File(lib.getFile()) : null;
-    }
 
     /**
      * Component deactivated notification. Called before a component is unregistered. Use this method to do cleanup if
@@ -121,11 +110,13 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public DslModel parse(String dsl) {
-        DslModel model = DslModel.Builder.make(DocumentTypeFeature.class);
-        try {
-            Map<String, Object> result = (Map) ((Invocable) engine).invokeFunction("parse", dsl);
 
+        DslModel model = DslModel.builder().with(DocumentTypeFeature.class).build();
+        try {
+            Map<String, Object> result = (Map<String, Object>) ((Invocable) engine).invokeFunction("parse", dsl);
+            model.setSource(dsl);
             model.visit((Map<String, Object>) result.get("value"));
             return model;
 

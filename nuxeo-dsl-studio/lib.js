@@ -1,7 +1,6 @@
 module.exports = {
     JS: [
         'js/lib/dagre.min.js',
-        'js/lib/chevrotain.min.js',
         'js/codemirror/jdl-hint.js',
         'js/codemirror/codemirror.jdl-mode.js',
         'js/nomnoml/skanaar.canvas.js',

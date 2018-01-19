@@ -14,7 +14,7 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="#282C34">
 	<title>Nuxeo DSL Studio</title>
 
-	<link rel="stylesheet" href="dist/css/main-db5885312f.css">
+	<link rel="stylesheet" href="dist/css/main-6dcd8931dc.css">
 	<link rel="shortcut icon" href="favicon.ico">
 </head>
 <body ng-app="jdlStudio" ng-controller="workspaceController as app">
@@ -96,10 +96,12 @@
 		<button class="btn" ng-click="app.dismissDialog()">Dismiss</button>
 	</div>
 	<script>
-	// temp hack to use jdl parser from jhipster-core
-	//var module = module || {};
+	// temp hack to use ndl parser from nuxeo-dsl-core
+	// ... this hack will probably not be so temporary :-)	
+	var global = window
 	</script>
-	<script src="dist/js/main-19fbcfd7b7.js"></script>
+	<script src="js/lib/chevrotain.min.js"></script>
+	<script src="dist/js/main-1214a43c71.js"></script>
 	<script>
 		(function (i, s, o, g, r, a, m) {
 			i['GoogleAnalyticsObject'] = r;
@@ -113,10 +115,10 @@
 			m.parentNode.insertBefore(a, m)
 		})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-		ga('create', 'UA-46075199-1', 'auto');
-		ga('create', 'UA-73986707-1', 'auto', 'jdlTracker');//specific for JDL studio
-		ga('send', 'pageview');
-		ga('jdlTracker.send', 'pageview');
+		//ga('create', 'UA-46075199-1', 'auto');
+		//ga('create', 'UA-73986707-1', 'auto', 'jdlTracker');//specific for JDL studio
+		//ga('send', 'pageview');
+		//ga('jdlTracker.send', 'pageview');
 
 	</script>
 </body>

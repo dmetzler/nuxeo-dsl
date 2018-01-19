@@ -5,32 +5,36 @@ const gulp = require("gulp"),
       print = require('gulp-print'),
       babel = require('gulp-babel'),
       runSequence = require('run-sequence'),
-      concat = require('gulp-concat');
+      concat = require('gulp-concat')
+      dest = gulp.dest;
 
 
 
 gulp.task('test', ['build'], function () {
-    return gulp.src(['*_spec.js'], { read: false })
+    return gulp.src(['*_spec.js'], { cwd: 'src/main/js',read: false })
         .pipe(mocha({ reporter: 'spec' }))
         .on('error', util.log);
 });
 
 
-gulp.task('build', function () {
-   return gulp.src(['nuxeo_dsl*.js'])
+gulp.task('lib', function () {
+    return gulp.src(['lib/*.js'], { cwd: 'src/main/js'})
+        .pipe(dest('target/generated-resources/js/lib'));
+});
+
+gulp.task('build', ['lib'],function () {
+   return gulp.src(['nuxeo_dsl*.js'], { cwd: 'src/main/js' })
         .pipe(babel({
             presets: ['env'],
           compact: false,
           ignore: '*_spec.js'}))
-
+        .pipe(dest('target/generated-resources/js'))
         .pipe(print())
-        .pipe(gulp.dest('dist'))
-        .on('error', util.log);
 });
 
 
 gulp.task('watch', function () {
-    gulp.watch(['nuxeo_dsl*.js'], ['test']);
+    gulp.watch(['src/main/js/nuxeo_dsl*.js'], ['test']);
 });
 
 gulp.task('default', () => {

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Created-By: Nuxeo Studio
+Bundle-ManifestVersion: 2
+Bundle-Version: 1.0.0
+Bundle-Name: Nuxeo DSL Studio Extension - ${id}
+Bundle-SymbolicName: ${id}
+Bundle-Vendor: Nuxeo
+Require-Bundle: org.nuxeo.runtime
+Nuxeo-Component: OSGI-INF/extensions.xml

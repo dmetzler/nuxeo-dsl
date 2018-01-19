@@ -16,6 +16,8 @@
 
   <modules>
     <module>nuxeo-dsl-core</module>
+    <module>nuxeo-dsl-studio</module>
+    <module>nuxeo-dsl-package</module>
   </modules>
 
   <repositories>
@@ -73,6 +75,16 @@
         <artifactId>nuxeo-dsl-core</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.nuxeo.dsl</groupId>
+        <artifactId>nuxeo-dsl-studio</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.dsl</groupId>
+        <artifactId>nuxeo-dsl-package</artifactId>
+        <version>${project.version}</version>
+      </dependency>      
     </dependencies>
   </dependencyManagement>
 </project>

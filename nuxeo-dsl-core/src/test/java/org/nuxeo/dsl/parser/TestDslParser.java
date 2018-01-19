@@ -7,6 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.xmap.XMap;
 import org.nuxeo.dsl.DslModel;
+import org.nuxeo.dsl.builder.Compiler;
+import org.nuxeo.dsl.builder.v9.DocumentTypeBuilder;
+import org.nuxeo.dsl.builder.BuildContext;
 import org.nuxeo.dsl.features.DocumentTypeFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.schema.DocumentTypeDescriptor;
@@ -57,5 +60,15 @@ public class TestDslParser {
 
 
 
+    }
+
+
+    @Test
+    public void it_can_build_a_model() throws Exception {
+        DslModel model = dslparser.parse("doctype NewType {} doctype OtherType {}");
+        try(BuildContext ctx = BuildContext.newContext()) {
+            Compiler compiler = Compiler.builder().with(DocumentTypeBuilder.class).build();
+            compiler.compile(model, ctx);
+        }
     }
 }
