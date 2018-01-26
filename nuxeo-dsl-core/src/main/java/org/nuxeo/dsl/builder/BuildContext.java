@@ -99,12 +99,17 @@ public class BuildContext implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close()  {
+           FileUtils.deleteQuietly(buildDir);
+    }
+
+    public File buildJar(File destDir, String projectId) throws IOException {
         writeExtensions();
 
-        File jar = new File("/tmp/dsl-studio-1.0.0.0-SNAPSHOT.jar");
+        File jar = new File(destDir, projectId + "-1.0.0.0-SNAPSHOT.jar");
         ZipUtils.zip(classes.listFiles(), jar);
         log.info("Builded " + jar);
+        return jar;
     }
 
     private void writeExtensions() throws IOException {

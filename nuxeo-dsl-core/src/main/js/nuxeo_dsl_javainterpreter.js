@@ -22,9 +22,10 @@
 
 
 
-	const ArrayList = Java.type('java.util.ArrayList');
+	const ArrayList = Java.type('java.util.ArrayList');	
 	const Map = Java.type('java.util.HashMap');
 	const DocumentTypeDescriptor = Java.type("org.nuxeo.ecm.core.schema.DocumentTypeDescriptor")
+	const SchemaDescriptor = Java.type("org.nuxeo.ecm.core.schema.SchemaDescriptor")
 
 
 	class NuxeoInterpreter extends nuxeo_dsl.NuxeoInterpreter {
@@ -57,6 +58,21 @@
 		          var descriptor = new DocumentTypeDescriptor();
 		          descriptor.name = d.name
 		          descriptor.superTypeName = d.extends;
+
+		          if(d.facets && d.facets.length > 0) {
+			          descriptor.facets = d.facets
+			      }
+
+			      if(d.schemas && d.schemas.length > 0) {
+			      	descriptor.schemas = d.schemas.map( s => {
+			      		var sd = new SchemaDescriptor()
+			      		sd.name = s.name
+			      		sd.isLazy = s.lazy
+			      		return sd;
+			      	})
+			      }
+
+
 		          doctypes.add(descriptor)
 
 	          })

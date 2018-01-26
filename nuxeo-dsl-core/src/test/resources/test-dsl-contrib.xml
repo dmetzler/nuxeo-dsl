@@ -1,0 +1,10 @@
+<component name="test-dsl">
+
+ <extension target="org.nuxeo.dsl.deployer.DslDeployer" point="dsl">
+
+   <dsl name="default">
+     <src>doctype NewType {}</src>
+   </dsl>
+ </extension>
+
+</component>

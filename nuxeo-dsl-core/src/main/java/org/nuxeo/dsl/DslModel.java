@@ -27,7 +27,7 @@ public class DslModel {
 
     public void visit(Map<String, Object> ast) {
          for(DslFeature feature : features.values()) {
-             feature.visit(ast);
+             feature.visit(this, ast);
          }
     }
 
@@ -56,6 +56,10 @@ public class DslModel {
 
     public void setSource(String src) {
         this.src = src;
+    }
+
+    public String getSource() {
+        return src;
     }
 
 

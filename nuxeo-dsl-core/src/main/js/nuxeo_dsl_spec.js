@@ -2,7 +2,6 @@
 const expect = require("chai").expect
 const parse = require("./nuxeo_dsl").parse
 
-
 describe("Nuxeo DSL", () => {
     context("Document type", () => {
         it("Can be defined", () => {
@@ -49,6 +48,29 @@ describe("Nuxeo DSL", () => {
                         schemas: [
                               {name: "common", lazy: false},
                               {name: "dublincore", lazy: true}
+                        ]
+                  }
+                ]
+            })
+        })
+
+
+        it("Can set the facets", () => {
+            let inputText =
+                "doctype myDoc extends File {" +
+                "\r\n   facets {" +
+                "\r\n      Folderish" +                
+                "\r\n   }" +
+                "\r\n}"
+            let result = parse(inputText)
+
+            expect(result.value).to.deep.equal({
+                doctypes: [
+                  {
+                        name:"myDoc",
+                        extends: "File",
+                        facets: [
+                          "Folderish"
                         ]
                   }
                 ]

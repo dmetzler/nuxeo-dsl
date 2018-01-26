@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.dsl.builder.BuilderService" version="1.0">
+
+  <implementation class="org.nuxeo.dsl.builder.BuilderServiceImpl" />
+
+  <service>
+    <provide interface="org.nuxeo.dsl.builder.BuilderService" />
+  </service>
+</component>

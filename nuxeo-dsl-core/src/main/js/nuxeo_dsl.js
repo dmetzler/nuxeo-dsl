@@ -20,6 +20,7 @@
   const Identifier = createToken({name: "Identifier", pattern: /\w+/ });
   const Extends = createToken({name: "Extends", pattern: /extends/ });
   const Schemas = createToken({name: "Schemas", pattern: /schemas/ });
+  const Facets = createToken({name: "Facets", pattern: /facets/ });
   const Lazy = createToken({name: "Lazy", pattern: /lazy/ });
   const LCurly = createToken({name: "LCurly", pattern: /{/});
   const RCurly = createToken({name: "RCurly", pattern: /}/});
@@ -45,6 +46,7 @@
     Comma,
     DocType,
     Schemas,
+    Facets,
     Schema,
     Facet,
     Lazy,
@@ -92,6 +94,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
                     $.MANY1(() => {
                         $.OR([
                            {ALT: () => { $.SUBRULE($.schemaList)}},
+                           {ALT: () => { $.SUBRULE($.facetList)}},
                         ])
                     })
                     $.CONSUME1(RCurly)
@@ -117,6 +120,18 @@ class NuxeoDSLParser extends chevrotain.Parser {
             })
             $.CONSUME2(RCurly)
           })
+
+          $.RULE("facetList", () => {
+            $.CONSUME(Facets)
+            $.CONSUME2(LCurly)
+            $.MANY(() => {
+              $.CONSUME1(Identifier)
+            })
+            $.CONSUME2(RCurly)
+          })
+
+
+
 
 
 
@@ -152,7 +167,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
           })
 
 
-      $.RULE("schemaBody", ()=> {
+          $.RULE("schemaBody", ()=> {
             $.CONSUME(LCurly)
             $.OPTION(() => {
                 $.SUBRULE($.fieldDescriptor)
@@ -252,15 +267,23 @@ class NuxeoDSLParser extends chevrotain.Parser {
           doctype.schemas = this.visit(ctx.schemaList)
         }
 
-
-
-
+        if(ctx.facetList.length > 0) {
+          doctype.facets = this.visit(ctx.facetList)
+        }
         return doctype
       }
 
       schemaList(ctx) {
         if(ctx.schemaRef.length > 0) {
            return ctx.schemaRef.map((schema) => this.visit(schema))
+        } else {
+          return []
+        }
+      }
+
+      facetList(ctx) {
+        if(ctx.Identifier.length > 0) {
+           return ctx.Identifier.map((id) => id.image)
         } else {
           return []
         }

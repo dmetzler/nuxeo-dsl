@@ -4,9 +4,9 @@
   angular.module('jdlStudio', []);
   angular.module('jdlStudio').controller('workspaceController', WorkspaceController);
 
-  WorkspaceController.$inject = ['$scope', '$document'];
+  WorkspaceController.$inject = ['$scope', '$document','$http'];
 
-  function WorkspaceController($scope, $document) {
+  function WorkspaceController($scope, $document,$http) {
     var app = this;
 
     var storage = null,
@@ -44,6 +44,7 @@
     app.saveViewModeToStorage = saveViewModeToStorage;
     app.exitViewMode = exitViewMode;
     app.importJDL = importJDL;
+    app.deployNDL = deployNDL;
 
     app.sidebarVisible = '';
     app.showStorageStatus = false;
@@ -65,6 +66,7 @@
     initFileDownloadLink(fileLink);
     initToolbarTooltips();
     initDialog('.upload-dialog');
+    initDialog('.deploy-dialog');
 
     // Monkey patch to avoid '$apply already in progress' error
     $scope.safeApply = function(fn) {
@@ -111,23 +113,7 @@
         app.sidebarVisible = 'visible';
       }
     }
-
-    function warnOldVersions() {
-      $.magnificPopup.open({
-        items: {
-          src: '#old-version-dialog'
-        },
-        type: 'inline',
-        fixedContentPos: false,
-        fixedBgPos: true,
-        overflowY: 'auto',
-        closeBtnInside: true,
-        preloader: false,
-        removalDelay: 300,
-        mainClass: 'my-mfp-slide-bottom'
-      });
-    }
-
+    
     function confirmDiscardCurrentGraph() {
       $.magnificPopup.open({
         items: {
@@ -188,8 +174,18 @@
         };
         r.readAsText(f);
       }
-      ga('send', 'event', 'JDL File', 'upload', 'JDL File upload');
-      ga('jdlTracker.send', 'event', 'JDL File', 'upload', 'JDL File upload');
+      //ga('send', 'event', 'JDL File', 'upload', 'JDL File upload');
+      //ga('jdlTracker.send', 'event', 'JDL File', 'upload', 'JDL File upload');
+    }
+
+
+    function deployNDL() {
+      console.log("Deploying to Nuxeo")
+      var ndl = app.jdlText
+      $http.put('/nuxeo/site/dsl', ndl).then(function() {
+        dismissDialog();
+      })
+                
     }
 
     function initDialog(className) {
@@ -207,7 +203,7 @@
     }
 
     function loadSample(cb) {
-      $.get('sample.ndl', function(data) {
+      $.get('/nuxeo/site/dsl', function(data) {
         defaultSource = data;
         cb();
       });
@@ -462,16 +458,7 @@
         var lineHeight = parseFloat($(editorElement).css('line-height'));
         top = 35 + lineHeight * (e.token.startLine );
         msg = e.message + ' -> line: ' + e.token.startLine;
-        /*var msg = '',
-          top = 0;
-        if (e.location) {
-          var lineHeight = parseFloat($(editorElement).css('line-height'));
-          top = 35 + lineHeight * e.location.start.line;
-          msg = e.message + ' -> line: ' + e.location.start.line;
-        } else {
-          throw e;
-        }*/
-
+        
         $scope.safeApply(function() {
           app.lineMarkerTop = top;
           app.hasError = true;

@@ -43,18 +43,18 @@
 				<a href="javascript:void(0)" ng-click="app.toggleSidebar('reference')" title="Language reference">
 					<i class="lnr lnr-book"></i>
 				</a>
-				<a id="savebutton" href="javascript:void(0)" download="jdl.png" title="Download snapshot of this diagram">
+				<a id="savebutton" href="javascript:void(0)" download="nuxeo-ndl.png" title="Download snapshot of this diagram">
 					<i class="lnr lnr-camera"></i>
 				</a>
-				<a id="saveTextbutton" href="javascript:void(0)" download="jdl.jh" title="Download text file of this JDL">
+				<a id="saveTextbutton" href="javascript:void(0)" download="nuxeo.ndl" title="Download text file of this JDL">
 					<i class="lnr lnr-download"></i>
 				</a>
 				<a id="uploadbutton" class="upload-dialog" href="#upload-dialog" title="Import text file of a JDL">
 					<i class="lnr lnr-upload"></i>
 				</a>
-				<!-- <a id="linkbutton" href="javascript:void(0)" target="_blank" title="Shareable link to this diagram">
-					<i class="lnr lnr-link"></i>
-				</a> -->
+				<a id="deploy" class="deploy-dialog" href="#deploy-dialog" title="Deploy NDL to Nuxeo server">
+					<i class="lnr lnr-sync"></i>
+				</a>
 				<a href="javascript:void(0)" ng-click="app.confirmDiscardCurrentGraph()" title="Discard this diagram">
 					<i class="lnr lnr-trash"></i>
 				</a>
@@ -105,6 +105,12 @@
 		<p>Select a <code>.jh</code> or <code>.txt</code> file</p>
 		<input class="upload" accept=".jh,.txt" type="file" id="jdlFileInput" /><br>
 		<button class="btn" ng-click="app.importJDL()">Import</button>
+		<button class="btn" ng-click="app.dismissDialog()">Dismiss</button>
+	</div>
+	<div id="deploy-dialog" class="mag-dialog zoom-anim-dialog mfp-hide">
+		<h1>Deploy NDL</h1>
+		<p>Do you want to deploy the current NDL to the Nuxeo server ?</p>
+		<button class="btn" ng-click="app.deployNDL()">Deploy</button>
 		<button class="btn" ng-click="app.dismissDialog()">Dismiss</button>
 	</div>
 	<script>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.dsl.deployer.DslDeployer" version="1.0">
+
+  <implementation class="org.nuxeo.dsl.deployer.DslDeployerImpl" />
+
+  <service>
+    <provide interface="org.nuxeo.dsl.deployer.DslDeployer" />
+  </service>
+
+
+  <extension-point name="dsl">
+    <documentation>
+      Extension point used to register the DSL that is currently deployed. It's only
+      to reference the Source as a reference for what is being deployed.
+      The source has been compiiled before.
+    </documentation>
+
+    <object class="org.nuxeo.dsl.deployer.DslSourceDescriptor" />
+  </extension-point>
+
+
+</component>

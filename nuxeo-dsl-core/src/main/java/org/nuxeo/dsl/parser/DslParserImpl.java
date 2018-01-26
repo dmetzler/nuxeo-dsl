@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.dsl.DslModel;
 import org.nuxeo.dsl.features.DocumentTypeFeature;
+import org.nuxeo.dsl.features.DslSourceFeature;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
@@ -105,11 +106,12 @@ public class DslParserImpl extends DefaultComponent implements DslParser {
     @SuppressWarnings("unchecked")
     public DslModel parse(String dsl) {
 
-        DslModel model = DslModel.builder().with(DocumentTypeFeature.class).build();
+        DslModel model = DslModel.builder().with(DocumentTypeFeature.class).with(DslSourceFeature.class).build();
         try {
             Map<String, Object> result = (Map<String, Object>) ((Invocable) engine).invokeFunction("parse", dsl);
             model.setSource(dsl);
-            model.visit((Map<String, Object>) result.get("value"));
+            Map<String, Object> ast = (Map<String, Object>) result.get("value");
+            model.visit(ast);
             return model;
 
         } catch (NoSuchMethodException | ScriptException e) {

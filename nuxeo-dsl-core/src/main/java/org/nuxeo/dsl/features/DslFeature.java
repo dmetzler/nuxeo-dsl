@@ -2,8 +2,10 @@ package org.nuxeo.dsl.features;
 
 import java.util.Map;
 
+import org.nuxeo.dsl.DslModel;
+
 public interface DslFeature {
 
-    void visit(Map<String, Object> ast);
+    void visit(DslModel model, Map<String, Object> ast);
 
 }

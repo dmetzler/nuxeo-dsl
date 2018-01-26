@@ -3,14 +3,17 @@ package org.nuxeo.dsl.parser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.xmap.XMap;
 import org.nuxeo.dsl.DslModel;
+import org.nuxeo.dsl.builder.BuildContext;
 import org.nuxeo.dsl.builder.Compiler;
 import org.nuxeo.dsl.builder.v9.DocumentTypeBuilder;
-import org.nuxeo.dsl.builder.BuildContext;
 import org.nuxeo.dsl.features.DocumentTypeFeature;
+import org.nuxeo.dsl.features.DslSourceFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.schema.DocumentTypeDescriptor;
 import org.nuxeo.ecm.platform.test.PlatformFeature;
@@ -44,7 +47,7 @@ public class TestDslParser {
     public void it_can_parse_a_dsl() throws Exception {
 
 
-        DslModel model = dslparser.parse("doctype NewType {}");
+        DslModel model = dslparser.parse("doctype NewType { schemas { common dublincore } facets {Folderish}}");
         DocumentTypeFeature feature = model.getFeature(DocumentTypeFeature.class);
 
         assertThat(feature.getDocTypes()).hasSize(1);
@@ -58,8 +61,6 @@ public class TestDslParser {
         System.out.println(xmap.toXML(descriptor ));
 
 
-
-
     }
 
 
@@ -69,6 +70,8 @@ public class TestDslParser {
         try(BuildContext ctx = BuildContext.newContext()) {
             Compiler compiler = Compiler.builder().with(DocumentTypeBuilder.class).build();
             compiler.compile(model, ctx);
+
+            ctx.buildJar(new File("/tmp"), "studio-dsl");
         }
     }
 }

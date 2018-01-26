@@ -17,6 +17,7 @@
   <modules>
     <module>nuxeo-dsl-core</module>
     <module>nuxeo-dsl-studio</module>
+    <module>nuxeo-dsl-rest</module>
     <module>nuxeo-dsl-package</module>
   </modules>
 
@@ -87,7 +88,7 @@
       </dependency>
       <dependency>
         <groupId>org.nuxeo.dsl</groupId>
-        <artifactId>nuxeo-dsl-web</artifactId>
+        <artifactId>nuxeo-dsl-rest</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

@@ -36,6 +36,18 @@ Some advantages of this strategy:
   * ...
 
 
+# TODO
+
+ * ~~Studio sync~~
+ * Doc Facets
+ * Doc schemas
+ * GraphQL integration
+ * GraphiQL in studio
+ * Alias in grammar
+ * Alias resolvers
+ * React book app with Appolo
+
+
 # Licensing
 
 Most of the source code in the Nuxeo Platform is copyright Nuxeo and

@@ -82,10 +82,15 @@ gulp.task('inject', () => {
 
 gulp.task('serve', ['inject'], () => {
 
+    // setup our local proxy
+    var proxyOptions = require('url').parse('http://localhost:8080/nuxeo');
+    proxyOptions.route = '/nuxeo';
+  
     // Serve files from the root of this project
     browserSync.init({
         server: {
             baseDir: "./",
+            middleware: [ require('proxy-middleware')(proxyOptions) ],
             index: "index-dev.html"
         }
     });
