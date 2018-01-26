@@ -36,8 +36,7 @@
     app.editorLoaded = editorLoaded;
     app.magnifyViewport = magnifyViewport;
     app.resetViewport = resetViewport;
-    app.confirmDiscardCurrentGraph = confirmDiscardCurrentGraph;
-    app.warnOldVersions = warnOldVersions;
+    app.confirmDiscardCurrentGraph = confirmDiscardCurrentGraph;    
     app.toggleSidebar = toggleSidebar;
     app.dismissDialog = dismissDialog;
     app.discardCurrentGraph = discardCurrentGraph;

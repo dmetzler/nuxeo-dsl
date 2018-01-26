@@ -8,4 +8,5 @@ Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.nuxeo.dsl.nuxeo-dsl-core;singleton=true
 Nuxeo-Component: OSGI-INF/dslparser-service.xml,
  OSGI-INF/builderservice-service.xml,
- OSGI-INF/dsldeployer-service.xml
+ OSGI-INF/dsldeployer-service.xml,
+ OSGI-INF/dsl-contrib.xml

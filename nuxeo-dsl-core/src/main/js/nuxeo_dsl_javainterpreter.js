@@ -26,6 +26,7 @@
 	const Map = Java.type('java.util.HashMap');
 	const DocumentTypeDescriptor = Java.type("org.nuxeo.ecm.core.schema.DocumentTypeDescriptor")
 	const SchemaDescriptor = Java.type("org.nuxeo.ecm.core.schema.SchemaDescriptor")
+	const SchemaBindingDescriptor = Java.type("org.nuxeo.ecm.core.schema.SchemaBindingDescriptor")
 
 
 	class NuxeoInterpreter extends nuxeo_dsl.NuxeoInterpreter {
@@ -41,15 +42,30 @@
 	      /* Visit methods go here */
 	      NuxeoDSL(ctx) {
 	    	let ast = super.NuxeoDSL(ctx)
-
-
 	    	let result = new Map()
+
 
 	        if (ast.schemas && ast.schemas.length > 0) {
 	          var schemas = new ArrayList();
-	          //result.put("schemas", schemas)
-	          //ctx.schemaDef.map((schema)=> this.visit(schema)).forEach(s => schemas.add(s))
+	          result.put("schemas", schemas)
+	          
+	          ast.schemas.map((schema)=> {
+
+	          	var item = { fields: new ArrayList()}
+		        item.descriptor = new SchemaBindingDescriptor()
+		        item.descriptor.name = schema.name
+		        item.descriptor.prefix = schema.prefix
+
+	          	for (var name in schema.fields) {
+	          		var field = new Map()
+	          		field.put("name", name)
+	          		field.put("type", schema.fields[name].type)
+	          		item.fields.add(field)
+	          	}
+	          	schemas.add(item)
+	          })
 	        }
+
 
 	        if (ast.doctypes && ast.doctypes.length > 0) {
 	          var doctypes = new ArrayList()

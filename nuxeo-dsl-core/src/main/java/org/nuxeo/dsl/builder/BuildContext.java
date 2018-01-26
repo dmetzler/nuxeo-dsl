@@ -39,28 +39,24 @@ public class BuildContext implements Closeable {
 
     private File buildDir;
 
-    private File classes;
-
-    private Manifest manifest;
-
     private File extension;
 
     private File osgi;
 
-    private BuildContext() {
+    private String projectId;
+
+    private BuildContext(String projectId) {
+        this.projectId = projectId;
         xmap = new XMap();
 
         buildDir = Files.createTempDir();
         log.info("Starting build in " + buildDir.getAbsolutePath());
 
-        classes = new File(buildDir, "classes");
-        classes.mkdir();
-
-        File file = new File(classes, "META-INF");
+        File file = new File(buildDir, "META-INF");
         file.mkdir();
         File manifestFile = new File(file, "MANIFEST.MF");
-        manifest = createManifest(manifestFile, "dsl_studio");
-        osgi = new File(classes, "OSGI-INF");
+        createManifest(manifestFile, "dsl_studio");
+        osgi = new File(buildDir, "OSGI-INF");
         osgi.mkdir();
 
         extension = new File(osgi, "extensions.xml");
@@ -75,11 +71,14 @@ public class BuildContext implements Closeable {
 
     }
 
-    protected Manifest createManifest(File manifestFile, String id) {
+    public File getBuildDir() {
+        return buildDir;
+    }
+
+    protected void createManifest(File manifestFile, String id) {
         try {
             String manifestContent = generateManifestContent(id);
             FileUtils.writeStringToFile(manifestFile, manifestContent, Charset.forName("UTF-8"));
-            return new Manifest(new ByteArrayInputStream(manifestContent.getBytes()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -99,17 +98,21 @@ public class BuildContext implements Closeable {
     }
 
     @Override
-    public void close()  {
-           FileUtils.deleteQuietly(buildDir);
+    public void close() {
+        FileUtils.deleteQuietly(buildDir);
     }
 
-    public File buildJar(File destDir, String projectId) throws IOException {
+    public File buildJar(File destDir) throws IOException {
         writeExtensions();
 
-        File jar = new File(destDir, projectId + "-1.0.0.0-SNAPSHOT.jar");
-        ZipUtils.zip(classes.listFiles(), jar);
+        File jar = new File(destDir, getProjectId() + "-1.0.0-SNAPSHOT.jar");
+        ZipUtils.zip(buildDir.listFiles(), jar);
         log.info("Builded " + jar);
         return jar;
+    }
+
+    public String getProjectId() {
+        return projectId;
     }
 
     private void writeExtensions() throws IOException {
@@ -140,7 +143,11 @@ public class BuildContext implements Closeable {
                 component.appendChild(contrib);
 
                 for (Object contribution : xpEntry.getValue()) {
-                    xmap.toXML(contribution, contrib);
+                    if (contribution instanceof XmlWriter) {
+                        ((XmlWriter) contribution).toXml(doc, contrib);
+                    } else {
+                        xmap.toXML(contribution, contrib);
+                    }
                 }
 
             }
@@ -153,8 +160,8 @@ public class BuildContext implements Closeable {
         xmap.register(klass);
     }
 
-    public static BuildContext newContext() {
-        return new BuildContext();
+    public static BuildContext newContext(String projectId) {
+        return new BuildContext(projectId);
     }
 
     public void registerXP(String componentName, String extensionPoint, Object contribution) {

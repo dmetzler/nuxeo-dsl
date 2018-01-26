@@ -6,4 +6,8 @@
   <service>
     <provide interface="org.nuxeo.dsl.parser.DslParser" />
   </service>
+
+  <extension-point name="feature">
+    <object class="org.nuxeo.dsl.parser.FeatureDescriptor" />
+  </extension-point>
 </component>

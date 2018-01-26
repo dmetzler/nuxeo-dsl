@@ -88,7 +88,7 @@ describe("Nuxeo DSL", () => {
                 schemas: [
                   {
                         name:"mySchema",
-                        prefix:"",
+                        prefix:"mySchema",
                         fields:{
                               prop1: { type: "String"},
                               prop2: { type: "String"},
@@ -98,11 +98,33 @@ describe("Nuxeo DSL", () => {
                 ]
             })
         })
+
+      it("Can have a prefix", () => {
+          let inputText =
+              "schema my:mySchema {prop1 String, prop2 , prop3 Integer }"
+          let result = parse(inputText)
+
+          expect(result.value).to.deep.equal({
+              schemas: [
+                {
+                      name:"mySchema",
+                      prefix:"my",
+                      fields:{
+                            prop1: { type: "String"},
+                            prop2: { type: "String"},
+                            prop3: { type: "Integer"}
+                      }
+                }
+              ]
+          })
+      })
+
       it("Can be inlined", () => {
             let inputText =
                 "doctype myDoc {" +
                 "\r\n   schemas {" +
                 "\r\n      custom {prop1 String, prop2 , prop3 Integer }" +
+                "\r\n      my:scheme {prop1 String, prop2 , prop3 Integer }" +
                 "\r\n   }" +
                 "\r\n}"
             let result = parse(inputText)
@@ -116,6 +138,10 @@ describe("Nuxeo DSL", () => {
                               {
                                 name: "custom", 
                                 lazy: false                                
+                            },
+                            {
+                                name: "scheme", 
+                                lazy: false                                
                             }
                         ]
 
@@ -125,7 +151,17 @@ describe("Nuxeo DSL", () => {
                   {
                         name:"custom",
                         lazy: false,
-                        prefix: "",
+                        prefix: "custom",
+                        fields:{
+                              prop1: { type: "String"},
+                              prop2: { type: "String"},
+                              prop3: { type: "Integer"}
+                        }
+                  },
+                  {
+                        name:"scheme",
+                        lazy: false,
+                        prefix: "my",
                         fields:{
                               prop1: { type: "String"},
                               prop2: { type: "String"},

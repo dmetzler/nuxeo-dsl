@@ -1,0 +1,17 @@
+<component name="org.nuxeo.dsl.contrib.default">
+
+
+  <extension target="org.nuxeo.dsl.parser.DslParser" point="feature">
+    <feature class="org.nuxeo.dsl.features.DocumentTypeFeature" />
+    <feature class="org.nuxeo.dsl.features.DslSourceFeature" />
+    <feature class="org.nuxeo.dsl.features.SchemaFeature" />
+  </extension>
+
+  <extension target="org.nuxeo.dsl.builder.BuilderService"
+    point="builder">
+    <builder class="org.nuxeo.dsl.builder.v9.DocumentTypeBuilder" />
+    <builder class="org.nuxeo.dsl.builder.v9.DslSourceBuilder" />
+    <builder class="org.nuxeo.dsl.builder.v9.SchemaBuilder" />
+  </extension>
+
+</component>

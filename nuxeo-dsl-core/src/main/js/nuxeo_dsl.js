@@ -25,6 +25,7 @@
   const LCurly = createToken({name: "LCurly", pattern: /{/});
   const RCurly = createToken({name: "RCurly", pattern: /}/});
   const Comma = createToken({ name: "Comma", pattern: /,/ })
+  const Colon = createToken({ name: "Colon", pattern: /:/ })
 
   const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -44,6 +45,7 @@
     WhiteSpace,
     Comment,
     Comma,
+    Colon,
     DocType,
     Schemas,
     Facets,
@@ -59,6 +61,7 @@
     LCurly.LABEL = "'{'"
     RCurly.LABEL = "'}'"
     Comma.LABEL = "','"
+    Colon.LABEL = "':'"
 
   let NuxeoLexer = new chevrotain.Lexer(allTokens)
 
@@ -137,11 +140,15 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
 
           $.RULE("schemaRef", ()=> {
-            $.CONSUME(Identifier)
-            $.OPTION(()=> {
+            $.OPTION1(() => {
+              $.CONSUME1(Identifier)
+              $.CONSUME(Colon)
+            })
+            $.CONSUME2(Identifier)
+            $.OPTION2(()=> {
               $.CONSUME(Lazy)
             })
-            $.OPTION2(()=> {
+            $.OPTION3(()=> {
               $.SUBRULE2($.schemaBody)
             })
           })
@@ -161,7 +168,11 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
           $.RULE("schema", ()=> {
             $.CONSUME(Schema)
-            $.CONSUME(Identifier)
+            $.OPTION(() => {
+              $.CONSUME1(Identifier)
+              $.CONSUME(Colon)
+            })
+            $.CONSUME2(Identifier)
             $.SUBRULE2($.schemaBody)
 
           })
@@ -243,9 +254,15 @@ class NuxeoDSLParser extends chevrotain.Parser {
       extractInlineSchemas(doctype) {
         let inlineSchema = []
         doctype.schemas.forEach((schema) => {
+
           if(schema.hasOwnProperty("fields")) {
+
+            if(!schema.hasOwnProperty("prefix")) {
+              schema.prefix = schema.name
+            }
             inlineSchema.push(schema)
-            doctype.schemas = doctype.schemas.filter((s)=>s.name !== schema.name)
+
+            doctype.schemas = doctype.schemas.filter((s)=>s.name !== schema.name)            
             doctype.schemas.push({name: schema.name, lazy: schema.lazy})
           }
         })
@@ -290,23 +307,43 @@ class NuxeoDSLParser extends chevrotain.Parser {
       }
 
       schemaRef(ctx) {
+
         let result = {
-          name: ctx.Identifier[0].image,
           lazy: ctx.Lazy.length > 0
         }
 
-        if(ctx.schemaBody.length > 0) {
-          result.fields = this.visit(ctx.schemaBody)
-          result.prefix = ""
+        if(ctx.Identifier.length > 1) {
+          result.name = ctx.Identifier[1].image
+          result.prefix = ctx.Identifier[0].image
+        } else {
+          result.name = ctx.Identifier[0].image
+
         }
+
+        
+        if(ctx.schemaBody.length > 0) {
+          result.fields = this.visit(ctx.schemaBody)        
+        }
+
         return result
       }
 
       schema(ctx) {
+        var name = "", prefix = "";
+        if(ctx.Identifier.length > 1) {
+          name = ctx.Identifier[1].image
+          prefix = ctx.Identifier[0].image
+        } else {
+          name = ctx.Identifier[0].image
+          prefix = ctx.Identifier[0].image
+        }
+
+
+
         let result = {
-            name: ctx.Identifier[0].image,
+            name: name,
             fields: this.visit(ctx.schemaBody),
-            prefix: ""
+            prefix: prefix
         }
         //result.delete.lazy
         return result

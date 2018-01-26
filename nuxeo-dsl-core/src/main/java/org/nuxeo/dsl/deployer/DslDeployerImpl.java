@@ -79,11 +79,11 @@ public class DslDeployerImpl extends DefaultComponent implements DslDeployer {
         DslModel model = parser.parse(dsl);
 
         BuilderService bs = Framework.getService(BuilderService.class);
-        try(BuildContext ctx = BuildContext.newContext()) {
+        try(BuildContext ctx = BuildContext.newContext("dsl-studio")) {
             bs.compile(model, ctx);
             try {
 
-                File bundle = ctx.buildJar(FileUtils.getTempDirectory(), "dsl-studio");
+                File bundle = ctx.buildJar(FileUtils.getTempDirectory());
 
                 ReloadService rs = Framework.getService(ReloadService.class);
                 ReloadContext rctx = new ReloadContext();
