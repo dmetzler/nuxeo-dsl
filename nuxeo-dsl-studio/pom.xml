@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>nuxeo-dsl-studio</artifactId>
-  <name>Nuxeo DSL - Studio Application</name>
+  <name>Nuxeo DSL :: Studio Editor</name>
   <description>Nuxeo DSL - Studio application</description>
 
   <dependencies>

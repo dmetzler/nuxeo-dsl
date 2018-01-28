@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.graphql.RequestControllerService.contrib">
+
+  <extension target="org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService"
+    point="filterConfig">
+
+    <filterConfig name="graphql" transactional="true" synchonize="true">
+      <pattern>${org.nuxeo.ecm.contextPath}/graphql/.*</pattern>
+    </filterConfig>
+  </extension>
+</component>

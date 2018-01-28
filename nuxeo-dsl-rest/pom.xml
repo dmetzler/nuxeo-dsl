@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>nuxeo-dsl-rest</artifactId>
-  <name>Nuxeo DSL Rest API</name>
+  <name>Nuxeo DSL :: Rest API</name>
   <description />
 
 

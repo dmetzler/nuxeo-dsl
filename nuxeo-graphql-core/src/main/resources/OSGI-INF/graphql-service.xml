@@ -1,0 +1,10 @@
+<component name="org.nuxeo.graphql.component">
+
+
+  <service>
+    <provide interface="org.nuxeo.graphql.GraphQLService" />
+  </service>
+
+  <implementation class="org.nuxeo.graphql.GraphQLComponent" />
+
+</component>

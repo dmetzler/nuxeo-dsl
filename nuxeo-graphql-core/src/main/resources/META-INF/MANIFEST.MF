@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: nuxeo.graphql
+Bundle-Name: nuxeo.graphql
+Bundle-Version: 1.0.qualifier
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ManifestVersion: 2
+Bundle-Vendor: Nuxeo
+Nuxeo-Component: OSGI-INF/graphql-service.xml,
+ OSGI-INF/request-contrib.xml

@@ -31,10 +31,10 @@ limitations under the License.
   </condition>
 
   <target name="init" description="Download all node and web dependencies">
-    <!--delete includeEmptyDirs="yes" failonerror="false">
+    <delete includeEmptyDirs="yes" failonerror="false">
       <fileset dir="node_modules" defaultexcludes="no" followsymlinks="false" />
       <fileset dir="bower_components" defaultexcludes="no" followsymlinks="false" />
-    </delete-->
+    </delete>
     <exec executable="${cmd.npm}" failonerror="true">
       <arg value="install" />
     </exec>

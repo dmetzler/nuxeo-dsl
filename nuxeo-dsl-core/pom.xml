@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>nuxeo-dsl-core</artifactId>
-  <name>Nuxeo dsl core</name>
+  <name>Nuxeo DSL :: core</name>
   <description />
 
 
