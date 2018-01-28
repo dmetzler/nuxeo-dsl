@@ -196,7 +196,41 @@ describe("Nuxeo DSL", () => {
 
     })
 
-    context("Page Providers", () => {
+    context("Alias definitions", () => {
+      it("Can be defined", () => {
+            let inputText =
+                "doctype myDoc { aliases { title prop { \"dc:title\" } description prop { \"dc:description\" }}}"
+            let result = parse(inputText)
+
+            expect(result.value).to.deep.equal({
+                doctypes: [
+                    {
+                        name:"myDoc",
+                        extends:"Document",
+                        aliases:[
+                              {name: "title", type: "prop", args: ["dc:title"] },
+                              {name: "description", type: "prop", args: ["dc:description"] }
+                        ]
+                  }
+                ]
+            })
+        })
+    })
+
+    context("Query definitions", () => {
+      it("Can be defined", () => {
+            let inputText =
+                "queries { libraries \"SELECT * FROM Library\" library(name) \"SELECT * FROM Library WHERE dc:title= '$name'\"}"
+            let result = parse(inputText)
+
+            expect(result.value).to.deep.equal({
+                queries:[
+                      {name: "libraries", params:[], query: "SELECT * FROM Library" },
+                      {name: "library", params:["name"], query: "SELECT * FROM Library WHERE dc:title= '$name'" }
+                ]
+                  
+            })
+        })
     })
 
 

@@ -5,6 +5,7 @@
     <feature class="org.nuxeo.dsl.features.DocumentTypeFeature" />
     <feature class="org.nuxeo.dsl.features.DslSourceFeature" />
     <feature class="org.nuxeo.dsl.features.SchemaFeature" />
+    <feature class="org.nuxeo.dsl.features.GraphQLFeature" />
   </extension>
 
   <extension target="org.nuxeo.dsl.builder.BuilderService"
@@ -12,6 +13,7 @@
     <builder class="org.nuxeo.dsl.builder.v9.DocumentTypeBuilder" />
     <builder class="org.nuxeo.dsl.builder.v9.DslSourceBuilder" />
     <builder class="org.nuxeo.dsl.builder.v9.SchemaBuilder" />
+    <builder class="org.nuxeo.dsl.builder.v9.GraphQLBuilder" />
   </extension>
 
 </component>

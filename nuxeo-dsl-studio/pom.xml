@@ -16,6 +16,29 @@
 
   <build>
     <plugins>
+       <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>unpack</id>
+                    <phase>process-resources</phase>
+                    <goals>
+                        <goal>unpack</goal>
+                    </goals>
+                    <configuration>
+                       <artifactItems>
+                         <artifactItem>
+                            <groupId>org.nuxeo.dsl</groupId>
+                            <artifactId>nuxeo-dsl-core</artifactId>
+                            <outputDirectory>./</outputDirectory>
+                            <includes>js/nuxeo_dsl.js</includes>
+                          </artifactItem>
+                        </artifactItems>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>

@@ -27,6 +27,8 @@
 	const DocumentTypeDescriptor = Java.type("org.nuxeo.ecm.core.schema.DocumentTypeDescriptor")
 	const SchemaDescriptor = Java.type("org.nuxeo.ecm.core.schema.SchemaDescriptor")
 	const SchemaBindingDescriptor = Java.type("org.nuxeo.ecm.core.schema.SchemaBindingDescriptor")
+	const AliasDescriptor = Java.type("org.nuxeo.graphql.AliasDescriptor")
+	const QueryDescriptor = Java.type("org.nuxeo.graphql.QueryDescriptor")
 
 
 	class NuxeoInterpreter extends nuxeo_dsl.NuxeoInterpreter {
@@ -69,6 +71,7 @@
 
 	        if (ast.doctypes && ast.doctypes.length > 0) {
 	          var doctypes = new ArrayList()
+	          var aliases = new ArrayList()
 	          ast.doctypes.forEach(function(d){
 
 		          var descriptor = new DocumentTypeDescriptor();
@@ -88,11 +91,39 @@
 			      	})
 			      }
 
+			      if(d.aliases && d.aliases.length > 0 ) {
+			      	d.aliases.forEach((alias)=> {
+						const aliasDesc = new AliasDescriptor()
+			      		aliasDesc.name = alias.name
+			      		aliasDesc.targetDoctype = d.name
+			      		aliasDesc.args = new ArrayList()
+			      		alias.args.forEach((arg)=> aliasDesc.args.add(arg))
+			      		aliases.add(aliasDesc)
+			      	})
+			      	
+			      }
+
 
 		          doctypes.add(descriptor)
 
 	          })
 	          result.put("doctypes", doctypes )
+	          result.put("aliases", aliases )
+
+	          
+	        }
+
+	        if (ast.queries && ast.queries.length > 0) {
+	        	const queries = new ArrayList()
+	        	ast.queries.forEach((query)=> {
+	        		const queryDesc = new QueryDescriptor()
+	        		queryDesc.name = query.name
+	        		queryDesc.query = query.query
+	        		queryDesc.args = new ArrayList()
+	        		query.params.forEach((p) => queryDesc.args.add(p))
+	        		queries.add(queryDesc)
+	        	})
+	        	result.put("queries", queries)
 	        }
 
 	        return result

@@ -17,8 +17,7 @@
         "lodash": "3.9.3",
         "jquery": "3.1.0",
         "magnific-popup": "1.0.1",
-        "icon-font.min": "https://cdn.linearicons.com/free/1.0.0/icon-font.min.css",
-        "nuxeodsl_parser": "https://raw.githubusercontent.com/dmetzler/nuxeo-dsl/master/nuxeo-dsl-core/src/main/js/nuxeo_dsl.js",
+        "icon-font.min": "https://cdn.linearicons.com/free/1.0.0/icon-font.min.css",        
         "angular": "^1.5.8",
         "codemirror": "^5.0"
     },

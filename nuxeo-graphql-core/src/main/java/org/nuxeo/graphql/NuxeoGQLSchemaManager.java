@@ -31,7 +31,10 @@ import org.nuxeo.ecm.core.schema.types.primitives.DoubleType;
 import org.nuxeo.ecm.core.schema.types.primitives.IntegerType;
 import org.nuxeo.ecm.core.schema.types.primitives.LongType;
 import org.nuxeo.ecm.core.schema.types.primitives.StringType;
+import org.nuxeo.graphql.GraphQLComponent.AliasRegistry;
+import org.nuxeo.graphql.GraphQLComponent.QueryRegistry;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.model.ContributionFragmentRegistry.FragmentList;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.DataFetcher;
@@ -55,6 +58,15 @@ public class NuxeoGQLSchemaManager {
     private Map<String, GraphQLObjectType> docTypeToGQLType = new HashMap<>();
 
     private Map<String, GraphQLObjectType> typesForSchema = new HashMap<>();
+
+    private AliasRegistry aliases;
+
+    private QueryRegistry queries;
+
+    public NuxeoGQLSchemaManager(AliasRegistry aliases, QueryRegistry queries) {
+        this.aliases = aliases;
+        this.queries = queries;
+    }
 
     public GraphQLSchema getNuxeoSchema() {
         buildNuxeoTypes();
@@ -150,10 +162,25 @@ public class NuxeoGQLSchemaManager {
                                                     .build());
                     }
                 }
+
+
+                aliases.toMap().values().stream().filter(a -> a.targetDoctype.equals(type.getName())).forEach(a -> {
+                    docTypeBuilder.field(newFieldDefinition()
+                            .name(a.name)
+                            .type(GraphQLString)
+                            .dataFetcher(getFetcherForAlias(a))
+                            .build());
+                });
+
                 docTypeToGQLType.put(type.getName(), docTypeBuilder.build());
             }
         }
 
+    }
+
+    private DataFetcher getFetcherForAlias(AliasDescriptor a) {
+        //TODO currently only works for propFetcher
+        return dataModelPropertyFetcher(a.args.get(0));
     }
 
     /**

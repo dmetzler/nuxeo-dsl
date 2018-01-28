@@ -1,0 +1,16 @@
+doctype NewType {
+  schemas {
+    common dublincore
+    custom {un,deux}
+    my:scheme { trois, quatre }
+  }
+
+  facets {Folderish}
+  aliases {
+    title prop { "dc:title" }
+  }
+}
+
+queries {
+  allNewType "SELECT * FROM NewType"
+}

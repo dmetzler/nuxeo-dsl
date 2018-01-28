@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.xmap.XMap;
@@ -79,7 +82,13 @@ public class TestDslParser {
 
     @Test
     public void it_can_build_a_model() throws Exception {
-        DslModel model = dslparser.parse("doctype NewType { schemas { common dublincore custom {un,deux} my:scheme { trois, quatre }}}");
+
+        InputStream is = getClass().getResourceAsStream("/sample-dsl.txt");
+        String src = IOUtils.toString(is, Charset.defaultCharset());
+
+
+
+        DslModel model = dslparser.parse(src);
 
 
         try (BuildContext ctx = BuildContext.newContext("dsl")) {

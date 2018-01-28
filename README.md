@@ -8,23 +8,47 @@ This is a toy project to play with [Chevrotain](https://github.com/SAP/chevrotai
 
 A document could be defined like this:
                 
-        document Department extends Document {
-           schemas {
-              common
-              resource
-              dublincore
-              //Inline declaration of a schema
-              department with prefix dpt { id long, name }
-           }
-           
-           alias {
-              // Aliases are a way to provide an indirection to
-              // the physical property or to a query.
-              created_at prop dc:created
-              modified_at prop dc:modified
-              allEmployee query "SELECT * FROM Employee WHERE emp:deptId = '$this.id'"
-           }              
+        doctype Library {
+          schemas {
+            dublincore common
+            lib:library { location, bookCount integer }
+          }
+          
+          aliases {
+            name prop { dc:title }
+            location prop { lib:location }
+            bookCount prop { lib:bookCount }
+            books query "SELECT * FROM Book WHERE ecm:parentId = $this.id"
+          }
+            
+          operation {
+            addLibrary(path, name)
+            updateLibray(name)
+            deleteLibrary...
+          }
         }
+      
+        doctype Book {
+          schemas {
+            dublincore common
+            bk:book { isbn, author }
+          }
+            
+          alias {
+            title prop { dc:title}        
+            isbn prop { book:isbn}
+            author prop { book:author}
+          }
+        }  
+        
+        queries {
+          libraries "SELECT * FROM Library"
+          library(name) "SELECT * FROM Library WHERE dc:title= '$name'"
+          books "SELECT * FROM Book"
+          bookByName(name) "SELECT * FROM Book WHERE dc:title= '$name'"
+        }
+        
+
 
 
 Some advantages of this strategy:
@@ -32,20 +56,22 @@ Some advantages of this strategy:
   * Simpler and clearer syntax to define the model
   * With a parser, the syntax can be checked
   * As it's JS it can be used server side or developer side.
-  * Can add new featrures like alias that could be useful for a GraphQL server
+  * Can add new features like alias that could be useful for a GraphQL server
   * ...
 
 
 # TODO
 
  * ~~Studio sync~~
- * Doc Facets
- * Doc schemas
- * GraphQL integration
- * GraphiQL in studio
- * Alias in grammar
- * Alias resolvers
- * React book app with Appolo
+ * ~~Doc Facets~~
+ * ~~Doc schemas~~
+ * ~~GraphQL integration~~
+ * ~~GraphiQL in studio~~
+ * ~~Alias in grammar~~
+ * ~~Alias resolvers~~
+ * GraphQL schema reload on HotReload
+ * Parameterized alias and queries
+ * React library app with Appolo
 
 
 # Licensing

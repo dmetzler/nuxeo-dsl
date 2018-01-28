@@ -7,4 +7,12 @@
 
   <implementation class="org.nuxeo.graphql.GraphQLComponent" />
 
+
+  <extension-point name="alias">
+    <object class="org.nuxeo.graphql.AliasDescriptor" />
+  </extension-point>
+
+  <extension-point name="query">
+    <object class="org.nuxeo.graphql.QueryDescriptor" />
+  </extension-point>
 </component>

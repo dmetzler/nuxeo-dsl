@@ -20,12 +20,20 @@
   const Identifier = createToken({name: "Identifier", pattern: /\w+/ });
   const Extends = createToken({name: "Extends", pattern: /extends/ });
   const Schemas = createToken({name: "Schemas", pattern: /schemas/ });
+  const Aliases = createToken({name: "Aliases", pattern: /aliases/ });
+  const Queries = createToken({name: "Queries", pattern: /queries/ });
   const Facets = createToken({name: "Facets", pattern: /facets/ });
   const Lazy = createToken({name: "Lazy", pattern: /lazy/ });
   const LCurly = createToken({name: "LCurly", pattern: /{/});
   const RCurly = createToken({name: "RCurly", pattern: /}/});
+  const LParenthesis = createToken({name: "LParenthesis", pattern: /\(/});
+  const RParenthesis = createToken({name: "RParenthesis", pattern: /\)/});
   const Comma = createToken({ name: "Comma", pattern: /,/ })
   const Colon = createToken({ name: "Colon", pattern: /:/ })
+  const StringLiteral = createToken({
+        name: "StringLiteral",
+        pattern: /"(?:[^\\"]|\\(?:[bfnrtv"\\/]|u[0-9a-fA-F]{4}))*"/
+    })
 
   const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -45,16 +53,21 @@
     WhiteSpace,
     Comment,
     Comma,
+    StringLiteral,
     Colon,
     DocType,
     Schemas,
     Facets,
+    Aliases,
+    Queries,
     Schema,
     Facet,
     Lazy,
     Extends,
     LCurly,
     RCurly,
+    LParenthesis,
+    RParenthesis,
     Identifier
   ]
 
@@ -81,6 +94,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
                  {ALT: () => { $.SUBRULE($.doctype)}},
                  {ALT: () => { $.SUBRULE($.schema)}},
                  {ALT: () => { $.SUBRULE($.facet)}},
+                 {ALT: () => { $.SUBRULE($.queryList)}},
               ])
             })
           })
@@ -98,6 +112,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
                         $.OR([
                            {ALT: () => { $.SUBRULE($.schemaList)}},
                            {ALT: () => { $.SUBRULE($.facetList)}},
+                           {ALT: () => { $.SUBRULE($.aliasList)}},                           
                         ])
                     })
                     $.CONSUME1(RCurly)
@@ -126,15 +141,53 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
           $.RULE("facetList", () => {
             $.CONSUME(Facets)
-            $.CONSUME2(LCurly)
+            $.CONSUME(LCurly)
             $.MANY(() => {
               $.CONSUME1(Identifier)
             })
-            $.CONSUME2(RCurly)
+            $.CONSUME(RCurly)
+          })
+
+          $.RULE("aliasList", () => {
+            $.CONSUME(Aliases)
+            $.CONSUME(LCurly)
+            $.MANY1(() => {
+              $.SUBRULE($.aliasDef)
+            })
+            $.CONSUME(RCurly)
           })
 
 
+          $.RULE("aliasDef", () => {
+              $.CONSUME(Identifier)              
+              $.CONSUME2(Identifier)
+              $.CONSUME2(LCurly)
+              $.AT_LEAST_ONE_SEP({SEP: Comma, DEF: () => {
+                $.CONSUME3(StringLiteral)
+              }})              
+              $.CONSUME2(RCurly)
+          })
 
+          $.RULE("queryList", () => {
+            $.CONSUME(Queries)
+            $.CONSUME(LCurly)
+            $.MANY1(() => {
+              $.SUBRULE($.queryDef)
+            })
+            $.CONSUME(RCurly)
+          })
+
+          $.RULE("queryDef", () => {
+              $.CONSUME1(Identifier)
+              $.OPTION(() => {
+                $.CONSUME(LParenthesis)
+                $.AT_LEAST_ONE_SEP({SEP: Comma, DEF: () => {
+                  $.CONSUME2(Identifier)
+                }})
+                $.CONSUME(RParenthesis)
+              })
+              $.CONSUME3(StringLiteral)              
+          })
 
 
 
@@ -247,6 +300,11 @@ class NuxeoDSLParser extends chevrotain.Parser {
           result.facets = ctx.facet.map((facet) => this.visit(facet))
         }
 
+        if(ctx.queryList.length > 0) {
+          result.queries = this.visit(ctx.queryList)
+        }
+
+
         return result
 
       }
@@ -287,6 +345,11 @@ class NuxeoDSLParser extends chevrotain.Parser {
         if(ctx.facetList.length > 0) {
           doctype.facets = this.visit(ctx.facetList)
         }
+
+        if(ctx.aliasList.length > 0) {
+          doctype.aliases = this.visit(ctx.aliasList)
+        }        
+
         return doctype
       }
 
@@ -305,6 +368,39 @@ class NuxeoDSLParser extends chevrotain.Parser {
           return []
         }
       }
+
+      aliasList(ctx) {
+        if(ctx.aliasDef.length > 0){
+          return ctx.aliasDef.map((alias)=> this.visit(alias))
+        }
+        return []
+      }
+
+          
+      aliasDef(ctx) {
+        const alias = {}
+        alias.name = ctx.Identifier[0].image
+        alias.type = ctx.Identifier[1].image
+        alias.args = ctx.StringLiteral.map((s) => s.image.substr(0,s.image.length-1).substr(1))
+        return alias
+      }      
+
+      queryList(ctx) {
+        if(ctx.queryDef.length > 0){
+          return ctx.queryDef.map((query)=> this.visit(query))
+        }
+        return []
+      }
+
+          
+      queryDef(ctx) {
+        const query = {}
+        query.name = ctx.Identifier.shift().image
+        const s = ctx.StringLiteral[0].image
+        query.query = s.substr(0,s.length-1).substr(1)
+        query.params = ctx.Identifier.map((a) => a.image)
+        return query
+      }      
 
       schemaRef(ctx) {
 
