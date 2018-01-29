@@ -1,14 +1,15 @@
 package org.nuxeo.graphql;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
-import org.nuxeo.runtime.model.SimpleContributionRegistry;
 
 import com.google.common.base.Joiner;
 
@@ -18,9 +19,9 @@ import graphql.schema.GraphQLSchema;
 
 public class GraphQLComponent extends DefaultComponent implements GraphQLService {
 
-    private AliasRegistry aliases = new AliasRegistry();
+    private Map<String, AliasDescriptor> aliases = new HashMap<>();
 
-    private QueryRegistry queries = new QueryRegistry();
+    private Map<String, QueryDescriptor> queries = new HashMap<>();
 
     private NuxeoGQLSchemaManager sm;
 
@@ -44,18 +45,22 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
     @Override
     public void registerContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
         if ("alias".equals(extensionPoint)) {
-            aliases.addContribution((AliasDescriptor) contribution);
+            AliasDescriptor alias = (AliasDescriptor) contribution;
+            aliases.put(alias.name,alias);
         } else if ("query".equals(extensionPoint)) {
-            queries.addContribution((QueryDescriptor) contribution);
+            QueryDescriptor query = (QueryDescriptor) contribution;
+            queries.put(query.name,query);
         }
     }
 
     @Override
     public void unregisterContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
         if ("alias".equals(extensionPoint)) {
-            aliases.removeContribution((AliasDescriptor) contribution);
+            AliasDescriptor alias = (AliasDescriptor) contribution;
+            aliases.remove(alias.name);
         } else if ("query".equals(extensionPoint)) {
-            queries.removeContribution((QueryDescriptor) contribution);
+            QueryDescriptor query = (QueryDescriptor) contribution;
+            queries.remove(query.name);
         }
     }
 
@@ -84,33 +89,6 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
         return sm;
     }
 
-    protected static class AliasRegistry extends SimpleContributionRegistry<AliasDescriptor> {
-
-        @Override
-        public String getContributionId(AliasDescriptor contrib) {
-            return contrib.name;
-        }
-
-        @Override
-        public AliasDescriptor getCurrentContribution(String id) {
-            return super.getCurrentContribution(id);
-        }
-
-    }
-
-    protected static class QueryRegistry extends SimpleContributionRegistry<QueryDescriptor> {
-
-        @Override
-        public String getContributionId(QueryDescriptor contrib) {
-            return contrib.name;
-        }
-
-        @Override
-        public QueryDescriptor getCurrentContribution(String id) {
-            return super.getCurrentContribution(id);
-        }
-
-    }
 
     @Override
     public void registerReloadListener(SchemaReloadedListener listener) {

@@ -87,7 +87,7 @@ public class DslDeployerImpl extends DefaultComponent implements DslDeployer {
 
                 ReloadService rs = Framework.getService(ReloadService.class);
                 ReloadContext rctx = new ReloadContext();
-                rctx.undeploy("dslstudio.extensions.dsl_studio");
+                rctx.undeploy("dslstudio.extensions."+ctx.getProjectId());
                 rctx.deploy(bundle);
                 rs.reloadBundles(rctx);
                 bundle.delete();

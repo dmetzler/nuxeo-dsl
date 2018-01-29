@@ -220,13 +220,14 @@ describe("Nuxeo DSL", () => {
     context("Query definitions", () => {
       it("Can be defined", () => {
             let inputText =
-                "queries { libraries \"SELECT * FROM Library\" library(name) \"SELECT * FROM Library WHERE dc:title= '$name'\"}"
+                "queries { libraries:Library \"SELECT * FROM Library\" library(name) \"SELECT * FROM Library WHERE dc:title= '$name'\" librari(name):Library \"SELECT * FROM Library WHERE dc:title= '$name'\"}"
             let result = parse(inputText)
 
             expect(result.value).to.deep.equal({
                 queries:[
-                      {name: "libraries", params:[], query: "SELECT * FROM Library" },
-                      {name: "library", params:["name"], query: "SELECT * FROM Library WHERE dc:title= '$name'" }
+                  {name: "libraries", params:[], query: "SELECT * FROM Library", resultType: "Library" },
+                  {name: "library", params:["name"], query: "SELECT * FROM Library WHERE dc:title= '$name'", resultType: "document" },
+                  {name: "librari", params:["name"], query: "SELECT * FROM Library WHERE dc:title= '$name'", resultType: "Library" }
                 ]
                   
             })

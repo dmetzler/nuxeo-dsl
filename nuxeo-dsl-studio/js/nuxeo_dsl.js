@@ -179,14 +179,23 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
       $.RULE("queryDef", function () {
         $.CONSUME1(Identifier);
-        $.OPTION(function () {
-          $.CONSUME(LParenthesis);
-          $.AT_LEAST_ONE_SEP({ SEP: Comma, DEF: function DEF() {
-              $.CONSUME2(Identifier);
-            } });
-          $.CONSUME(RParenthesis);
+        $.OPTION1(function () {
+          $.SUBRULE($.queryParams);
         });
+        $.OPTION2(function () {
+          $.CONSUME(Colon);
+          $.CONSUME3(Identifier);
+        });
+
         $.CONSUME3(StringLiteral);
+      });
+
+      $.RULE("queryParams", function () {
+        $.CONSUME(LParenthesis);
+        $.AT_LEAST_ONE_SEP({ SEP: Comma, DEF: function DEF() {
+            $.CONSUME2(Identifier);
+          } });
+        $.CONSUME(RParenthesis);
       });
 
       $.RULE("schemaRef", function () {
@@ -431,10 +440,24 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
         query.name = ctx.Identifier.shift().image;
         var s = ctx.StringLiteral[0].image;
         query.query = s.substr(0, s.length - 1).substr(1);
-        query.params = ctx.Identifier.map(function (a) {
-          return a.image;
-        });
+
+        if (ctx.queryParams.length > 0) {
+          query.params = this.visit(ctx.queryParams);
+        } else {
+          query.params = [];
+        }
+
+        query.resultType = ctx.Identifier[0] ? ctx.Identifier[0].image : "document";
         return query;
+      }
+    }, {
+      key: "queryParams",
+      value: function queryParams(ctx) {
+        if (ctx.Identifier.length > 0) {
+          return ctx.Identifier.map(function (p) {
+            return p.image;
+          });
+        }
       }
     }, {
       key: "schemaRef",

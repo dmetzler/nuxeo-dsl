@@ -10,8 +10,11 @@ import org.nuxeo.common.xmap.annotation.XObject;
 @XObject("query")
 public class QueryDescriptor {
 
-    @XNode("@namel")
+    @XNode("@name")
     public String name;
+
+    @XNode("@resultType")
+    public String resultType;
 
     @XNode("nxql")
     public String query;

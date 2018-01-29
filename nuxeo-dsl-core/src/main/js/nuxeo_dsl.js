@@ -179,17 +179,24 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
           $.RULE("queryDef", () => {
               $.CONSUME1(Identifier)
-              $.OPTION(() => {
-                $.CONSUME(LParenthesis)
-                $.AT_LEAST_ONE_SEP({SEP: Comma, DEF: () => {
-                  $.CONSUME2(Identifier)
-                }})
-                $.CONSUME(RParenthesis)
+              $.OPTION1(() => {
+                $.SUBRULE($.queryParams)
               })
+              $.OPTION2(() => {
+                $.CONSUME(Colon)
+                $.CONSUME3(Identifier)                
+              })
+
               $.CONSUME3(StringLiteral)              
           })
 
-
+          $.RULE("queryParams", () => {
+            $.CONSUME(LParenthesis)
+            $.AT_LEAST_ONE_SEP({SEP: Comma, DEF: () => {
+              $.CONSUME2(Identifier)
+            }})
+            $.CONSUME(RParenthesis)
+          })
 
 
           $.RULE("schemaRef", ()=> {
@@ -398,9 +405,27 @@ class NuxeoDSLParser extends chevrotain.Parser {
         query.name = ctx.Identifier.shift().image
         const s = ctx.StringLiteral[0].image
         query.query = s.substr(0,s.length-1).substr(1)
-        query.params = ctx.Identifier.map((a) => a.image)
+
+        if(ctx.queryParams.length > 0) {
+          query.params = this.visit(ctx.queryParams)
+        } else {
+          query.params = []
+        }
+
+
+        
+
+        query.resultType = ctx.Identifier[0] ? ctx.Identifier[0].image : "document"
         return query
-      }      
+      } 
+
+
+      queryParams(ctx) {
+        if(ctx.Identifier.length > 0) {
+          return ctx.Identifier.map((p)=> p.image)
+        } 
+
+      }     
 
       schemaRef(ctx) {
 

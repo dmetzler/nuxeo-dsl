@@ -9,13 +9,16 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.el.ELContext;
+
 import org.apache.commons.lang3.StringUtils;
+import org.jboss.el.ExpressionFactoryImpl;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DataModel;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -32,11 +35,8 @@ import org.nuxeo.ecm.core.schema.types.primitives.DoubleType;
 import org.nuxeo.ecm.core.schema.types.primitives.IntegerType;
 import org.nuxeo.ecm.core.schema.types.primitives.LongType;
 import org.nuxeo.ecm.core.schema.types.primitives.StringType;
-import org.nuxeo.ecm.platform.rendering.api.RenderingEngine;
-import org.nuxeo.ecm.platform.rendering.api.RenderingException;
-import org.nuxeo.ecm.platform.rendering.fm.FreemarkerEngine;
-import org.nuxeo.graphql.GraphQLComponent.AliasRegistry;
-import org.nuxeo.graphql.GraphQLComponent.QueryRegistry;
+import org.nuxeo.ecm.platform.el.ELService;
+import org.nuxeo.ecm.platform.el.ExpressionEvaluator;
 import org.nuxeo.runtime.api.Framework;
 
 import graphql.TypeResolutionEnvironment;
@@ -63,11 +63,13 @@ public class NuxeoGQLSchemaManager {
 
     private Map<String, GraphQLObjectType> typesForSchema = new HashMap<>();
 
-    private AliasRegistry aliases;
+    private Map<String, AliasDescriptor> aliases;
 
-    private QueryRegistry queries;
+    private Map<String, QueryDescriptor> queries;
 
-    public NuxeoGQLSchemaManager(AliasRegistry aliases, QueryRegistry queries) {
+    private ExpressionEvaluator el = new ExpressionEvaluator(new ExpressionFactoryImpl());
+
+    public NuxeoGQLSchemaManager(Map<String, AliasDescriptor> aliases, Map<String, QueryDescriptor> queries) {
         this.aliases = aliases;
         this.queries = queries;
     }
@@ -79,10 +81,33 @@ public class NuxeoGQLSchemaManager {
     }
 
     private GraphQLObjectType buildQueryType() {
-        return newObject().name("RootQueryType")
+        Builder builder = newObject().name("nuxeo")
                           .field(getDocumentQueryTypeField())
-                          .field(getNXQLQueryTypeField())
-                          .build();
+                          .field(getNXQLQueryTypeField());
+        for(QueryDescriptor query : queries.values()) {
+            builder.field(getQueryFieldType(query));
+        }
+        return builder.build();
+
+
+    }
+
+    private GraphQLFieldDefinition getQueryFieldType(QueryDescriptor query) {
+        graphql.schema.GraphQLFieldDefinition.Builder builder = newFieldDefinition().name(query.name);
+        if(query.args.size() >0) {
+            for(String arg : query.args) {
+                builder.argument(new GraphQLArgument(arg, new GraphQLNonNull(GraphQLString)));
+            }
+        }
+
+        if("document".equals(query.resultType)) {
+            builder.type(new GraphQLList(documentInterface));
+        } else {
+            builder.type(new GraphQLList(docTypeToGQLType.get(query.resultType)));
+        }
+
+        builder.dataFetcher(getQueryDataFetcher(query.query));
+        return builder.build();
 
     }
 
@@ -167,9 +192,7 @@ public class NuxeoGQLSchemaManager {
                     }
                 }
 
-                aliases.toMap().values().stream()
-                .filter(a -> a.targetDoctype.equals(type.getName()))
-                .forEach(a -> {
+                aliases.values().stream().filter(a -> a.targetDoctype.equals(type.getName())).forEach(a -> {
                     docTypeBuilder.field(
                             newFieldDefinition().name(a.name)
                                                 .type(getTypeForAlias(a))
@@ -186,8 +209,13 @@ public class NuxeoGQLSchemaManager {
     private GraphQLOutputType getTypeForAlias(AliasDescriptor alias) {
         if ("prop".equals(alias.type)) {
             return GraphQLString;
-        } else if("query".equals(alias.type)) {
-            return new GraphQLList(new GraphQLTypeReference("document"));
+        } else if ("query".equals(alias.type)) {
+
+            if(alias.args.size()>1) {
+                return new GraphQLList(docTypeToGQLType.get(alias.args.get(1)));
+            } else {
+                return new GraphQLList(new GraphQLTypeReference("document"));
+            }
         } else {
             return null;
         }
@@ -196,7 +224,7 @@ public class NuxeoGQLSchemaManager {
     private DataFetcher getFetcherForAlias(AliasDescriptor alias) {
         if ("prop".equals(alias.type)) {
             return dataModelPropertyFetcher(alias.args.get(0));
-        } else if("query".equals(alias.type)) {
+        } else if ("query".equals(alias.type)) {
             return getQueryDataFetcher(alias.args.get(0));
         } else {
             return null;
@@ -209,26 +237,25 @@ public class NuxeoGQLSchemaManager {
             public Object get(DataFetchingEnvironment environment) {
                 CoreSession session = getSession(environment.getContext());
                 if (session != null) {
+                    String finalQuery = query;
+
+                    ELService elService = Framework.getService(ELService.class);
+                    ELContext elContext = elService.createELContext();
+                    el.bindValue(elContext, "principal", session.getPrincipal());
+
+                    if(environment.getArguments().size()>0) {
+                        for(Entry<String,Object> paramEntry : environment.getArguments().entrySet()) {
+                            el.bindValue(elContext, paramEntry.getKey(), paramEntry.getValue());
+                        }
+                    }
 
                     if (environment.getSource() instanceof DocumentModel) {
-
                         DocumentModel doc = (DocumentModel) environment.getSource();
-                        Map<String,Object> bindings = new HashMap<>();
-                        bindings.put("this",doc);
-
-                        RenderingEngine engine = new FreemarkerEngine();
-                        StringWriter sw = new StringWriter();
-                        try {
-                            engine.render(query, bindings, sw);
-                            return session.query(sw.toString());
-                        } catch (RenderingException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-
+                        el.bindValue(elContext, "this", doc);
                     }
-                    return null;
+
+                    finalQuery = el.evaluateExpression(elContext, query, String.class);
+                    return session.query(finalQuery);
                 }
                 return null;
             }
@@ -296,6 +323,9 @@ public class NuxeoGQLSchemaManager {
                 if (source instanceof DataModel) {
                     DataModel dm = (DataModel) source;
                     return dm.getValue(prefixedName);
+                } else if (source instanceof DocumentModel) {
+                    DocumentModel doc = (DocumentModel) source;
+                    return doc.getPropertyValue(prefixedName);
                 }
                 return null;
             }

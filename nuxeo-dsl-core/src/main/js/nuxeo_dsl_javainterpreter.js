@@ -96,6 +96,7 @@
 						const aliasDesc = new AliasDescriptor()
 			      		aliasDesc.name = alias.name
 			      		aliasDesc.targetDoctype = d.name
+			      		aliasDesc.type = alias.type
 			      		aliasDesc.args = new ArrayList()
 			      		alias.args.forEach((arg)=> aliasDesc.args.add(arg))
 			      		aliases.add(aliasDesc)
@@ -119,6 +120,7 @@
 	        		const queryDesc = new QueryDescriptor()
 	        		queryDesc.name = query.name
 	        		queryDesc.query = query.query
+	        		queryDesc.resultType = query.resultType
 	        		queryDesc.args = new ArrayList()
 	        		query.params.forEach((p) => queryDesc.args.add(p))
 	        		queries.add(queryDesc)
