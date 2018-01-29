@@ -55,7 +55,7 @@ public class BuildContext implements Closeable {
         File file = new File(buildDir, "META-INF");
         file.mkdir();
         File manifestFile = new File(file, "MANIFEST.MF");
-        createManifest(manifestFile, "dsl_studio");
+        createManifest(manifestFile, this.projectId);
         osgi = new File(buildDir, "OSGI-INF");
         osgi.mkdir();
 

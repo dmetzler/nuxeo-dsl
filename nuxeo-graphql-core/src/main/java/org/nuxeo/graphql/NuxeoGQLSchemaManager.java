@@ -9,6 +9,7 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLInterfaceType.newInterface;
 import static graphql.schema.GraphQLObjectType.newObject;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,10 +32,12 @@ import org.nuxeo.ecm.core.schema.types.primitives.DoubleType;
 import org.nuxeo.ecm.core.schema.types.primitives.IntegerType;
 import org.nuxeo.ecm.core.schema.types.primitives.LongType;
 import org.nuxeo.ecm.core.schema.types.primitives.StringType;
+import org.nuxeo.ecm.platform.rendering.api.RenderingEngine;
+import org.nuxeo.ecm.platform.rendering.api.RenderingException;
+import org.nuxeo.ecm.platform.rendering.fm.FreemarkerEngine;
 import org.nuxeo.graphql.GraphQLComponent.AliasRegistry;
 import org.nuxeo.graphql.GraphQLComponent.QueryRegistry;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.ContributionFragmentRegistry.FragmentList;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.DataFetcher;
@@ -46,6 +49,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLObjectType.Builder;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
@@ -163,13 +167,14 @@ public class NuxeoGQLSchemaManager {
                     }
                 }
 
-
-                aliases.toMap().values().stream().filter(a -> a.targetDoctype.equals(type.getName())).forEach(a -> {
-                    docTypeBuilder.field(newFieldDefinition()
-                            .name(a.name)
-                            .type(GraphQLString)
-                            .dataFetcher(getFetcherForAlias(a))
-                            .build());
+                aliases.toMap().values().stream()
+                .filter(a -> a.targetDoctype.equals(type.getName()))
+                .forEach(a -> {
+                    docTypeBuilder.field(
+                            newFieldDefinition().name(a.name)
+                                                .type(getTypeForAlias(a))
+                                                .dataFetcher(getFetcherForAlias(a))
+                                                .build());
                 });
 
                 docTypeToGQLType.put(type.getName(), docTypeBuilder.build());
@@ -178,9 +183,57 @@ public class NuxeoGQLSchemaManager {
 
     }
 
-    private DataFetcher getFetcherForAlias(AliasDescriptor a) {
-        //TODO currently only works for propFetcher
-        return dataModelPropertyFetcher(a.args.get(0));
+    private GraphQLOutputType getTypeForAlias(AliasDescriptor alias) {
+        if ("prop".equals(alias.type)) {
+            return GraphQLString;
+        } else if("query".equals(alias.type)) {
+            return new GraphQLList(new GraphQLTypeReference("document"));
+        } else {
+            return null;
+        }
+    }
+
+    private DataFetcher getFetcherForAlias(AliasDescriptor alias) {
+        if ("prop".equals(alias.type)) {
+            return dataModelPropertyFetcher(alias.args.get(0));
+        } else if("query".equals(alias.type)) {
+            return getQueryDataFetcher(alias.args.get(0));
+        } else {
+            return null;
+        }
+    }
+
+    private DataFetcher getQueryDataFetcher(String query) {
+        return new DataFetcher() {
+            @Override
+            public Object get(DataFetchingEnvironment environment) {
+                CoreSession session = getSession(environment.getContext());
+                if (session != null) {
+
+                    if (environment.getSource() instanceof DocumentModel) {
+
+                        DocumentModel doc = (DocumentModel) environment.getSource();
+                        Map<String,Object> bindings = new HashMap<>();
+                        bindings.put("this",doc);
+
+                        RenderingEngine engine = new FreemarkerEngine();
+                        StringWriter sw = new StringWriter();
+                        try {
+                            engine.render(query, bindings, sw);
+                            return session.query(sw.toString());
+                        } catch (RenderingException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                    return null;
+                }
+                return null;
+            }
+
+        };
     }
 
     /**

@@ -71,6 +71,7 @@ Some advantages of this strategy:
  * ~~Alias resolvers~~
  * GraphQL schema reload on HotReload
  * Parameterized alias and queries
+ * Mutations (basic CRUD)
  * React library app with Appolo
 
 

@@ -10,11 +10,12 @@ import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
 import graphql.schema.GraphQLSchema;
+import graphql.servlet.DefaultExecutionStrategyProvider;
 import graphql.servlet.GraphQLContext;
 import graphql.servlet.GraphQLServletListener;
 import graphql.servlet.SimpleGraphQLServlet;
 
-public class NuxeoGraphqlServlet extends SimpleGraphQLServlet {
+public class NuxeoGraphqlServlet extends SimpleGraphQLServlet  {
 
     /**
      *
@@ -22,7 +23,7 @@ public class NuxeoGraphqlServlet extends SimpleGraphQLServlet {
     private static final long serialVersionUID = 1L;
 
     public NuxeoGraphqlServlet() {
-        super(buildSchema());
+        super(new NuxeoGraphQLSchemaProvider(), new DefaultExecutionStrategyProvider(), null, null);
 
         this.addListener(new GraphQLServletListener() {
             @Override
@@ -41,7 +42,7 @@ public class NuxeoGraphqlServlet extends SimpleGraphQLServlet {
 
             @Override
             public RequestCallback onRequest(HttpServletRequest request, HttpServletResponse response) {
-                if(!TransactionHelper.isTransactionActive()){
+                if (!TransactionHelper.isTransactionActive()) {
                     TransactionHelper.startTransaction();
                 }
                 return new RequestCallback() {
@@ -63,5 +64,6 @@ public class NuxeoGraphqlServlet extends SimpleGraphQLServlet {
     private static GraphQLSchema buildSchema() {
         return Framework.getService(GraphQLService.class).getGraphQLSchema();
     }
+
 
 }

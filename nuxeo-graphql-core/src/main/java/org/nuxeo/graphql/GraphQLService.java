@@ -9,4 +9,6 @@ public interface GraphQLService {
     Object query(CoreSession session, String gqlQuery);
 
     GraphQLSchema getGraphQLSchema();
+
+    void registerReloadListener(SchemaReloadedListener listener);
 }
