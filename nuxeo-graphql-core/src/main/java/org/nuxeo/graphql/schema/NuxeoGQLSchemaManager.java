@@ -1,4 +1,4 @@
-package org.nuxeo.graphql;
+package org.nuxeo.graphql.schema;
 
 import static graphql.Scalars.GraphQLBoolean;
 import static graphql.Scalars.GraphQLFloat;
@@ -12,18 +12,10 @@ import static graphql.schema.GraphQLObjectType.newObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.el.ELContext;
-
 import org.apache.commons.lang3.StringUtils;
-import org.jboss.el.ExpressionFactoryImpl;
-import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DataModel;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.IdRef;
-import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.schema.DocumentType;
 import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.core.schema.types.Field;
@@ -35,13 +27,18 @@ import org.nuxeo.ecm.core.schema.types.primitives.DoubleType;
 import org.nuxeo.ecm.core.schema.types.primitives.IntegerType;
 import org.nuxeo.ecm.core.schema.types.primitives.LongType;
 import org.nuxeo.ecm.core.schema.types.primitives.StringType;
-import org.nuxeo.ecm.platform.el.ELService;
-import org.nuxeo.ecm.platform.el.ExpressionEvaluator;
+import org.nuxeo.graphql.descriptors.AliasDescriptor;
+import org.nuxeo.graphql.descriptors.QueryDescriptor;
+import org.nuxeo.graphql.schema.fetcher.DocPropertyDataFetcher;
+import org.nuxeo.graphql.schema.fetcher.DocumentModelDataFetcher;
+import org.nuxeo.graphql.schema.fetcher.DocumentPropertyDataFetcher;
+import org.nuxeo.graphql.schema.fetcher.NxqlQueryDataFetcher;
+import org.nuxeo.graphql.schema.fetcher.QueryDataFetcher;
+import org.nuxeo.graphql.schema.fetcher.SchemaDataFetcher;
 import org.nuxeo.runtime.api.Framework;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInterfaceType;
@@ -67,8 +64,6 @@ public class NuxeoGQLSchemaManager {
 
     private Map<String, QueryDescriptor> queries;
 
-    private ExpressionEvaluator el = new ExpressionEvaluator(new ExpressionFactoryImpl());
-
     public NuxeoGQLSchemaManager(Map<String, AliasDescriptor> aliases, Map<String, QueryDescriptor> queries) {
         this.aliases = aliases;
         this.queries = queries;
@@ -81,32 +76,29 @@ public class NuxeoGQLSchemaManager {
     }
 
     private GraphQLObjectType buildQueryType() {
-        Builder builder = newObject().name("nuxeo")
-                          .field(getDocumentQueryTypeField())
-                          .field(getNXQLQueryTypeField());
-        for(QueryDescriptor query : queries.values()) {
+        Builder builder = newObject().name("nuxeo").field(getDocumentQueryTypeField()).field(getNXQLQueryTypeField());
+        for (QueryDescriptor query : queries.values()) {
             builder.field(getQueryFieldType(query));
         }
         return builder.build();
-
 
     }
 
     private GraphQLFieldDefinition getQueryFieldType(QueryDescriptor query) {
         graphql.schema.GraphQLFieldDefinition.Builder builder = newFieldDefinition().name(query.name);
-        if(query.args.size() >0) {
-            for(String arg : query.args) {
+        if (query.args.size() > 0) {
+            for (String arg : query.args) {
                 builder.argument(new GraphQLArgument(arg, new GraphQLNonNull(GraphQLString)));
             }
         }
 
-        if("document".equals(query.resultType)) {
+        if ("document".equals(query.resultType)) {
             builder.type(new GraphQLList(documentInterface));
         } else {
             builder.type(new GraphQLList(docTypeToGQLType.get(query.resultType)));
         }
 
-        builder.dataFetcher(getQueryDataFetcher(query.query));
+        builder.dataFetcher(new QueryDataFetcher(query.query));
         return builder.build();
 
     }
@@ -115,7 +107,7 @@ public class NuxeoGQLSchemaManager {
         return newFieldDefinition().name("documents")
                                    .type(new GraphQLList(documentInterface))
                                    .argument(new GraphQLArgument("nxql", new GraphQLNonNull(GraphQLString)))
-                                   .dataFetcher(getNxqlQueryFetcher())
+                                   .dataFetcher(new NxqlQueryDataFetcher())
                                    .build();
     }
 
@@ -130,7 +122,7 @@ public class NuxeoGQLSchemaManager {
                                    .type(documentInterface)
                                    .argument(new GraphQLArgument("path", GraphQLString))
                                    .argument(new GraphQLArgument("id", GraphQLString))
-                                   .dataFetcher(getDocFetcher())
+                                   .dataFetcher(new DocumentModelDataFetcher())
                                    .build();
     }
 
@@ -144,19 +136,12 @@ public class NuxeoGQLSchemaManager {
             documentInterface = newInterface().name("document")
                                               .field(newFieldDefinition().type(GraphQLString)//
                                                                          .name("path")
-                                                                         .dataFetcher(
-                                                                                 getDocPropertyFetcher())
+                                                                         .dataFetcher(new DocPropertyDataFetcher())
                                                                          .build())
                                               .field(newFieldDefinition().type(GraphQLString)//
                                                                          .name("id")
-                                                                         .dataFetcher(getDocPropertyFetcher())
+                                                                         .dataFetcher(new DocPropertyDataFetcher())
                                                                          .build())
-                                              .field(newFieldDefinition().type(
-                                                      new GraphQLList(new GraphQLTypeReference("document")))
-                                                                         .name("children")
-                                                                         .dataFetcher(getChildrenDataFetcher())
-                                                                         .build())
-
                                               .typeResolver(getNuxeoDocumentTypeResolver())
                                               .build();
 
@@ -167,15 +152,11 @@ public class NuxeoGQLSchemaManager {
                 Builder docTypeBuilder = newObject().name(type.getName()).withInterface(documentInterface);
                 docTypeBuilder.field(newFieldDefinition().type(GraphQLString)//
                                                          .name("path")
-                                                         .dataFetcher(getDocPropertyFetcher())
+                                                         .dataFetcher(new DocPropertyDataFetcher())
                                                          .build())
                               .field(newFieldDefinition().type(GraphQLString)//
                                                          .name("id")
-                                                         .dataFetcher(getDocPropertyFetcher())
-                                                         .build())
-                              .field(newFieldDefinition().type(new GraphQLList(new GraphQLTypeReference("document")))
-                                                         .name("children")
-                                                         .dataFetcher(getChildrenDataFetcher())
+                                                         .dataFetcher(new DocPropertyDataFetcher())
                                                          .build());
 
                 for (Schema schema : type.getSchemas()) {
@@ -187,7 +168,7 @@ public class NuxeoGQLSchemaManager {
                         docTypeBuilder.field(
                                 newFieldDefinition().name(name)
                                                     .type(typeForSchema)
-                                                    .dataFetcher(getSchemaFetcher(schema))
+                                                    .dataFetcher(new SchemaDataFetcher(schema))
                                                     .build());
                     }
                 }
@@ -211,7 +192,7 @@ public class NuxeoGQLSchemaManager {
             return GraphQLString;
         } else if ("query".equals(alias.type)) {
 
-            if(alias.args.size()>1) {
+            if (alias.args.size() > 1) {
                 return new GraphQLList(docTypeToGQLType.get(alias.args.get(1)));
             } else {
                 return new GraphQLList(new GraphQLTypeReference("document"));
@@ -223,44 +204,12 @@ public class NuxeoGQLSchemaManager {
 
     private DataFetcher getFetcherForAlias(AliasDescriptor alias) {
         if ("prop".equals(alias.type)) {
-            return dataModelPropertyFetcher(alias.args.get(0));
+            return new DocumentPropertyDataFetcher(alias.args.get(0));
         } else if ("query".equals(alias.type)) {
-            return getQueryDataFetcher(alias.args.get(0));
+            return new QueryDataFetcher(alias.args.get(0));
         } else {
             return null;
         }
-    }
-
-    private DataFetcher getQueryDataFetcher(String query) {
-        return new DataFetcher() {
-            @Override
-            public Object get(DataFetchingEnvironment environment) {
-                CoreSession session = getSession(environment.getContext());
-                if (session != null) {
-                    String finalQuery = query;
-
-                    ELService elService = Framework.getService(ELService.class);
-                    ELContext elContext = elService.createELContext();
-                    el.bindValue(elContext, "principal", session.getPrincipal());
-
-                    if(environment.getArguments().size()>0) {
-                        for(Entry<String,Object> paramEntry : environment.getArguments().entrySet()) {
-                            el.bindValue(elContext, paramEntry.getKey(), paramEntry.getValue());
-                        }
-                    }
-
-                    if (environment.getSource() instanceof DocumentModel) {
-                        DocumentModel doc = (DocumentModel) environment.getSource();
-                        el.bindValue(elContext, "this", doc);
-                    }
-
-                    finalQuery = el.evaluateExpression(elContext, query, String.class);
-                    return session.query(finalQuery);
-                }
-                return null;
-            }
-
-        };
     }
 
     /**
@@ -286,7 +235,7 @@ public class NuxeoGQLSchemaManager {
                 if (t.isSimpleType()) {
                     graphql.schema.GraphQLFieldDefinition.Builder fieldBuilder = newFieldDefinition().name(
                             f.getName().getLocalName()).dataFetcher(
-                                    dataModelPropertyFetcher(f.getName().getPrefixedName()));
+                                    new DocumentPropertyDataFetcher(f.getName().getPrefixedName()));
                     if (t instanceof StringType) {
                         fieldBuilder.type(GraphQLString);
                         schemaBuilder.field(fieldBuilder.build());
@@ -314,24 +263,6 @@ public class NuxeoGQLSchemaManager {
         return typesForSchema.get(schemaName);
     }
 
-    private DataFetcher dataModelPropertyFetcher(final String prefixedName) {
-        return new DataFetcher() {
-
-            @Override
-            public Object get(DataFetchingEnvironment environment) {
-                Object source = environment.getSource();
-                if (source instanceof DataModel) {
-                    DataModel dm = (DataModel) source;
-                    return dm.getValue(prefixedName);
-                } else if (source instanceof DocumentModel) {
-                    DocumentModel doc = (DocumentModel) source;
-                    return doc.getPropertyValue(prefixedName);
-                }
-                return null;
-            }
-        };
-    }
-
     private TypeResolver getNuxeoDocumentTypeResolver() {
         return new TypeResolver() {
 
@@ -346,100 +277,7 @@ public class NuxeoGQLSchemaManager {
         };
     }
 
-    private CoreSession getSession(Object ctx) {
-        if (ctx instanceof NuxeoGraphqlContext) {
-            return ((NuxeoGraphqlContext) ctx).getSession();
-        }
-        return null;
-    }
 
-    private DataFetcher getDocFetcher() {
-        return new DataFetcher() {
 
-            public Object get(DataFetchingEnvironment environment) {
-                String path = environment.getArgument("path");
-                String id = environment.getArgument("id");
-
-                CoreSession session = getSession(environment.getContext());
-                if (session != null) {
-                    if (path != null) {
-                        return session.getDocument(new PathRef(path));
-                    }
-                    if (id != null) {
-                        return session.getDocument(new IdRef(id));
-                    }
-                }
-                return null;
-            }
-        };
-
-    }
-
-    private DataFetcher getNxqlQueryFetcher() {
-        return new DataFetcher() {
-
-            @Override
-            public Object get(DataFetchingEnvironment environment) {
-                String nxql = environment.getArgument("nxql");
-                CoreSession session = getSession(environment.getContext());
-                if (session != null) {
-                    return session.query(nxql);
-                }
-                return null;
-            }
-        };
-    }
-
-    private DataFetcher getChildrenDataFetcher() {
-        return new DataFetcher() {
-            @Override
-            public Object get(DataFetchingEnvironment environment) {
-                CoreSession session = getSession(environment.getContext());
-                if (session != null) {
-
-                    if (environment.getSource() instanceof DocumentModel) {
-                        DocumentModel doc = (DocumentModel) environment.getSource();
-                        return session.getChildren(doc.getRef());
-                    }
-                    return null;
-                }
-                return null;
-            }
-
-        };
-    }
-
-    private DataFetcher getSchemaFetcher(final Schema schema) {
-        return new DataFetcher() {
-
-            @Override
-            public Object get(DataFetchingEnvironment environment) {
-                if (environment.getSource() instanceof DocumentModel) {
-                    DocumentModel doc = (DocumentModel) environment.getSource();
-                    return doc.getDataModel(schema.getName());
-                }
-                return null;
-            }
-
-        };
-    }
-
-    private DataFetcher getDocPropertyFetcher() {
-        return new DataFetcher() {
-            public Object get(DataFetchingEnvironment environment) {
-                String fieldName = environment.getFields().get(0).getName();
-                if (environment.getSource() instanceof DocumentModel) {
-                    DocumentModel doc = (DocumentModel) environment.getSource();
-                    if ("path".equals(fieldName)) {
-                        return doc.getPathAsString();
-                    } else if ("id".equals(fieldName)) {
-                        return doc.getId();
-                    }
-                }
-                return null;
-            }
-
-        };
-    }
 
 }

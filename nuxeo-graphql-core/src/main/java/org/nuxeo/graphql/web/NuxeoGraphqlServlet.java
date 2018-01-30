@@ -1,4 +1,4 @@
-package org.nuxeo.graphql;
+package org.nuxeo.graphql.web;
 
 import java.util.Map;
 import java.util.Optional;
@@ -6,10 +6,8 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
-import graphql.schema.GraphQLSchema;
 import graphql.servlet.DefaultExecutionStrategyProvider;
 import graphql.servlet.GraphQLContext;
 import graphql.servlet.GraphQLServletListener;
@@ -60,10 +58,4 @@ public class NuxeoGraphqlServlet extends SimpleGraphQLServlet  {
             Optional<HttpServletResponse> response) {
         return new NuxeoHttpGraphQLContext(request, response);
     }
-
-    private static GraphQLSchema buildSchema() {
-        return Framework.getService(GraphQLService.class).getGraphQLSchema();
-    }
-
-
 }

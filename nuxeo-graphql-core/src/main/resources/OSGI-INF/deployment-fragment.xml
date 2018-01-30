@@ -5,7 +5,7 @@
     <servlet>
       <servlet-name>Nuxeo GraphQL servlet</servlet-name>
       <servlet-class>
-        org.nuxeo.graphql.NuxeoGraphqlServlet
+        org.nuxeo.graphql.web.NuxeoGraphqlServlet
       </servlet-class>
     </servlet>
     <servlet-mapping>

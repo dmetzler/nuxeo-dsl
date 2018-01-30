@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.nuxeo.dsl.DslModel;
-import org.nuxeo.graphql.AliasDescriptor;
-import org.nuxeo.graphql.QueryDescriptor;
+import org.nuxeo.graphql.descriptors.AliasDescriptor;
+import org.nuxeo.graphql.descriptors.QueryDescriptor;
 
 public class GraphQLFeature implements DslFeature{
 

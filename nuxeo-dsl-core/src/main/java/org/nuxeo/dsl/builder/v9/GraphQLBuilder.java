@@ -4,8 +4,8 @@ import org.nuxeo.dsl.builder.BuildContext;
 import org.nuxeo.dsl.builder.Builder;
 import org.nuxeo.dsl.features.DslFeature;
 import org.nuxeo.dsl.features.GraphQLFeature;
-import org.nuxeo.graphql.AliasDescriptor;
-import org.nuxeo.graphql.QueryDescriptor;
+import org.nuxeo.graphql.descriptors.AliasDescriptor;
+import org.nuxeo.graphql.descriptors.QueryDescriptor;
 
 public class GraphQLBuilder implements Builder {
 

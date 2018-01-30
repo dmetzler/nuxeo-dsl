@@ -92,16 +92,4 @@ public class GraphQLServiceTest {
         Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query);
         assertThat(result.get("documents")).hasSameSizeAs(session.query(nxql));
     }
-
-
-    @Test
-    public void should_be_able_to_query_children() throws Exception {
-        String nxql = "SELECT * FROM WorkspaceRoot";
-        String query ="{documents(nxql:\"" + nxql + "\") { path children { id path } }}";
-        Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query);
-        assertThat(result.get("documents")).hasSameSizeAs(session.query(nxql));
-        System.out.println(result);
-
-
-    }
 }

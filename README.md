@@ -8,46 +8,37 @@ This is a toy project to play with [Chevrotain](https://github.com/SAP/chevrotai
 
 A document could be defined like this:
                 
-        doctype Library {
-          schemas {
-            dublincore common
-            lib:library { location, bookCount integer }
+        doctype Library extends Folder {
+        schemas {
+            common dublincore
+              lib:library { city, country }
+          }
+          aliases {
+            name prop {"dc:title"}
+              city prop {"lib:city"}
+              country prop {"lib:country"}
+              books query {"select * from Book where ecm:parentId='${this.id}'", "Book"}
+          }
+      }
+       
+      doctype Book {
+        schemas {
+            common dublincore
+              bk:book { author, isbn}
           }
           
           aliases {
-            name prop { dc:title }
-            location prop { lib:location }
-            bookCount prop { lib:bookCount }
-            books query "SELECT * FROM Book WHERE ecm:parentId = $this.id"
+            title prop {"dc:title"}
+            author prop {"bk:author"}
+            isbn prop {"bk:isbn"}
+            sameAuthor query { "SELECT * FROM Book WHERE bk:author = '${this.bk.author}'"}
           }
-            
-          operation {
-            addLibrary(path, name)
-            updateLibray(name)
-            deleteLibrary...
-          }
-        }
+      }
       
-        doctype Book {
-          schemas {
-            dublincore common
-            bk:book { isbn, author }
-          }
-            
-          alias {
-            title prop { dc:title}        
-            isbn prop { book:isbn}
-            author prop { book:author}
-          }
-        }  
-        
-        queries {
-          libraries "SELECT * FROM Library"
-          library(name) "SELECT * FROM Library WHERE dc:title= '$name'"
-          books "SELECT * FROM Book"
-          bookByName(name) "SELECT * FROM Book WHERE dc:title= '$name'"
-        }
-        
+      queries {
+        allLibraries:Library "select * from Library" 
+          getLibrary(name):Library "select * from Library where dc:title = '${name}'" 
+      }
 
 
 
@@ -56,7 +47,7 @@ Some advantages of this strategy:
   * Simpler and clearer syntax to define the model
   * With a parser, the syntax can be checked
   * As it's JS it can be used server side or developer side.
-  * Can add new features like alias that could be useful for a GraphQL server
+  * New features like alias that could be used by the GraphQL server
   * ...
 
 
@@ -69,10 +60,11 @@ Some advantages of this strategy:
  * ~~GraphiQL in studio~~
  * ~~Alias in grammar~~
  * ~~Alias resolvers~~
- * GraphQL schema reload on HotReload
- * Parameterized alias and queries
+ * ~~GraphQL schema reload on HotReload~~
+ * ~~Parameterized alias and queries~~
  * Mutations (basic CRUD)
  * React library app with Appolo
+ * CodeMirror: Syntax higlighting and code completion
 
 
 # Licensing

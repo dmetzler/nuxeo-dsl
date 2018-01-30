@@ -7,6 +7,11 @@ import java.util.Map;
 
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.NuxeoException;
+import org.nuxeo.graphql.descriptors.AliasDescriptor;
+import org.nuxeo.graphql.descriptors.CrudDescriptor;
+import org.nuxeo.graphql.descriptors.QueryDescriptor;
+import org.nuxeo.graphql.schema.NuxeoGQLSchemaManager;
+import org.nuxeo.graphql.web.DefaultNuxeoGraphqlContext;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
@@ -19,9 +24,15 @@ import graphql.schema.GraphQLSchema;
 
 public class GraphQLComponent extends DefaultComponent implements GraphQLService {
 
+    private static final String XP_QUERY = "query";
+
+    private static final String XP_ALIAS = "alias";
+
     private Map<String, AliasDescriptor> aliases = new HashMap<>();
 
     private Map<String, QueryDescriptor> queries = new HashMap<>();
+
+    private Map<String, CrudDescriptor> cruds = new HashMap<>();
 
     private NuxeoGQLSchemaManager sm;
 
@@ -44,23 +55,29 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
 
     @Override
     public void registerContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
-        if ("alias".equals(extensionPoint)) {
+        if (XP_ALIAS.equals(extensionPoint)) {
             AliasDescriptor alias = (AliasDescriptor) contribution;
-            aliases.put(alias.name,alias);
-        } else if ("query".equals(extensionPoint)) {
+            aliases.put(alias.name, alias);
+        } else if (XP_QUERY.equals(extensionPoint)) {
             QueryDescriptor query = (QueryDescriptor) contribution;
-            queries.put(query.name,query);
+            queries.put(query.name, query);
+        } else if ("crud".equals(extensionPoint)) {
+            CrudDescriptor crud = (CrudDescriptor) contribution;
+            cruds.put(crud.targetDoctype, crud);
         }
     }
 
     @Override
     public void unregisterContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
-        if ("alias".equals(extensionPoint)) {
+        if (XP_ALIAS.equals(extensionPoint)) {
             AliasDescriptor alias = (AliasDescriptor) contribution;
             aliases.remove(alias.name);
-        } else if ("query".equals(extensionPoint)) {
+        } else if (XP_QUERY.equals(extensionPoint)) {
             QueryDescriptor query = (QueryDescriptor) contribution;
             queries.remove(query.name);
+        }else if ("crud".equals(extensionPoint)) {
+            CrudDescriptor crud = (CrudDescriptor) contribution;
+            cruds.remove(crud.targetDoctype);
         }
     }
 
@@ -76,7 +93,6 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
 
     }
 
-
     @Override
     public GraphQLSchema getGraphQLSchema() {
         return getSchemaManager().getNuxeoSchema();
@@ -88,7 +104,6 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
         }
         return sm;
     }
-
 
     @Override
     public void registerReloadListener(SchemaReloadedListener listener) {

@@ -23,6 +23,7 @@
   const Aliases = createToken({name: "Aliases", pattern: /aliases/ });
   const Queries = createToken({name: "Queries", pattern: /queries/ });
   const Facets = createToken({name: "Facets", pattern: /facets/ });
+  const Crud  = createToken({name: "Crud", pattern: /crud/ });
   const Lazy = createToken({name: "Lazy", pattern: /lazy/ });
   const LCurly = createToken({name: "LCurly", pattern: /{/});
   const RCurly = createToken({name: "RCurly", pattern: /}/});
@@ -62,6 +63,7 @@
     Queries,
     Schema,
     Facet,
+    Crud,
     Lazy,
     Extends,
     LCurly,
@@ -112,11 +114,13 @@ class NuxeoDSLParser extends chevrotain.Parser {
                         $.OR([
                            {ALT: () => { $.SUBRULE($.schemaList)}},
                            {ALT: () => { $.SUBRULE($.facetList)}},
-                           {ALT: () => { $.SUBRULE($.aliasList)}},                           
+                           {ALT: () => { $.SUBRULE($.aliasList)}},
+                           {ALT: () => { $.CONSUME(Crud)}},
                         ])
                     })
                     $.CONSUME1(RCurly)
               })
+
           })
 
           $.RULE("schemaList", () => {
@@ -309,7 +313,7 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
         if(ctx.queryList.length > 0) {
           result.queries = this.visit(ctx.queryList)
-        }
+        }        
 
 
         return result
@@ -355,7 +359,11 @@ class NuxeoDSLParser extends chevrotain.Parser {
 
         if(ctx.aliasList.length > 0) {
           doctype.aliases = this.visit(ctx.aliasList)
-        }        
+        }
+
+        if(ctx.Crud.length > 0) {
+          doctype.crud = {}
+        }       
 
         return doctype
       }

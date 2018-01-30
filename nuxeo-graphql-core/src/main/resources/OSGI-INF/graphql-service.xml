@@ -9,10 +9,14 @@
 
 
   <extension-point name="alias">
-    <object class="org.nuxeo.graphql.AliasDescriptor" />
+    <object class="org.nuxeo.graphql.descriptors.AliasDescriptor" />
   </extension-point>
 
   <extension-point name="query">
-    <object class="org.nuxeo.graphql.QueryDescriptor" />
+    <object class="org.nuxeo.graphql.descriptors.QueryDescriptor" />
+  </extension-point>
+
+  <extension-point name="crud">
+    <object class="org.nuxeo.graphql.descriptors.CrudDescriptor" />
   </extension-point>
 </component>

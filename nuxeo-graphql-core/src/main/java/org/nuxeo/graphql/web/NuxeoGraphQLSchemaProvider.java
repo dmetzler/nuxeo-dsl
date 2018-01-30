@@ -1,7 +1,9 @@
-package org.nuxeo.graphql;
+package org.nuxeo.graphql.web;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.nuxeo.graphql.GraphQLService;
+import org.nuxeo.graphql.SchemaReloadedListener;
 import org.nuxeo.runtime.api.Framework;
 
 import graphql.schema.GraphQLSchema;

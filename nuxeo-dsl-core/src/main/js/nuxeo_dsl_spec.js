@@ -76,6 +76,25 @@ describe("Nuxeo DSL", () => {
                 ]
             })
         })
+
+
+        it("Can ask for CRUD mutations", () => {
+            let inputText =
+                "doctype myDoc  {" +
+                "\r\n   crud" +
+                "\r\n}"
+            let result = parse(inputText)
+
+            expect(result.value).to.deep.equal({
+                doctypes: [
+                  {
+                        name:"myDoc",
+                        extends: "Document",
+                        crud: {}
+                  }
+                ]
+            })
+        })
     })
 
     context("Schemas definition", () => {
