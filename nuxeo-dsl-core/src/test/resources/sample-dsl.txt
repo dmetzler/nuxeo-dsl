@@ -10,6 +10,8 @@ doctype NewType {
     title prop { "dc:title" }
     sametrois query { "select * from NewType where my:trois = ${this.my.trois}"}
   }
+
+  crud
 }
 
 queries {

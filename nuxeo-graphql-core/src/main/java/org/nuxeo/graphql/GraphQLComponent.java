@@ -24,6 +24,8 @@ import graphql.schema.GraphQLSchema;
 
 public class GraphQLComponent extends DefaultComponent implements GraphQLService {
 
+    private static final String XP_CRUD = "crud";
+
     private static final String XP_QUERY = "query";
 
     private static final String XP_ALIAS = "alias";
@@ -61,7 +63,7 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
         } else if (XP_QUERY.equals(extensionPoint)) {
             QueryDescriptor query = (QueryDescriptor) contribution;
             queries.put(query.name, query);
-        } else if ("crud".equals(extensionPoint)) {
+        } else if (XP_CRUD.equals(extensionPoint)) {
             CrudDescriptor crud = (CrudDescriptor) contribution;
             cruds.put(crud.targetDoctype, crud);
         }
@@ -75,7 +77,7 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
         } else if (XP_QUERY.equals(extensionPoint)) {
             QueryDescriptor query = (QueryDescriptor) contribution;
             queries.remove(query.name);
-        }else if ("crud".equals(extensionPoint)) {
+        } else if (XP_CRUD.equals(extensionPoint)) {
             CrudDescriptor crud = (CrudDescriptor) contribution;
             cruds.remove(crud.targetDoctype);
         }
@@ -94,13 +96,24 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
     }
 
     @Override
+    public Object query(CoreSession session, String gqlQuery, Map<String, Object> arguments) {
+        ExecutionResult result = GraphQL.newGraphQL(getGraphQLSchema()).build().execute(gqlQuery,
+                new DefaultNuxeoGraphqlContext(session), arguments);
+        if (result.getErrors().size() > 0) {
+            throw new NuxeoException(Joiner.on(", ").join(result.getErrors()));
+        }
+
+        return result.getData();
+    }
+
+    @Override
     public GraphQLSchema getGraphQLSchema() {
         return getSchemaManager().getNuxeoSchema();
     }
 
     private NuxeoGQLSchemaManager getSchemaManager() {
         if (sm == null) {
-            sm = new NuxeoGQLSchemaManager(aliases, queries);
+            sm = new NuxeoGQLSchemaManager(aliases, queries, cruds);
         }
         return sm;
     }

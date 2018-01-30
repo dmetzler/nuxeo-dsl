@@ -5,6 +5,7 @@ import org.nuxeo.dsl.builder.Builder;
 import org.nuxeo.dsl.features.DslFeature;
 import org.nuxeo.dsl.features.GraphQLFeature;
 import org.nuxeo.graphql.descriptors.AliasDescriptor;
+import org.nuxeo.graphql.descriptors.CrudDescriptor;
 import org.nuxeo.graphql.descriptors.QueryDescriptor;
 
 public class GraphQLBuilder implements Builder {
@@ -15,10 +16,12 @@ public class GraphQLBuilder implements Builder {
 
         ctx.registerXMap(AliasDescriptor.class);
         ctx.registerXMap(QueryDescriptor.class);
+        ctx.registerXMap(CrudDescriptor.class);
         GraphQLFeature feature = (GraphQLFeature) f;
 
         feature.getAliases().stream().forEach(a -> ctx.registerXP("org.nuxeo.graphql.component", "alias", a));
         feature.getQueries().stream().forEach(a -> ctx.registerXP("org.nuxeo.graphql.component", "query", a));
+        feature.getCruds().stream().forEach(a -> ctx.registerXP("org.nuxeo.graphql.component", "crud", a));
 
     }
 

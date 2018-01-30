@@ -73,52 +73,51 @@
           if (ast.doctypes && ast.doctypes.length > 0) {
             var doctypes = new ArrayList()
             var aliases = new ArrayList()
-            ast.doctypes.forEach(function(d){
-                var crud = new ArrayList()
-              var descriptor = new DocumentTypeDescriptor();
-              descriptor.name = d.name
-              descriptor.superTypeName = d.extends;
+            var crud = new ArrayList()
+            ast.doctypes.forEach(function(d){                
+	            var descriptor = new DocumentTypeDescriptor();
+	            descriptor.name = d.name
+	            descriptor.superTypeName = d.extends;
 
-              if(d.facets && d.facets.length > 0) {
-                descriptor.facets = d.facets
-            }
+	            if(d.facets && d.facets.length > 0) {
+	              descriptor.facets = d.facets
+	            }
 
-            if(d.schemas && d.schemas.length > 0) {
-              descriptor.schemas = d.schemas.map( s => {
-                var sd = new SchemaDescriptor()
-                sd.name = s.name
-                sd.isLazy = s.lazy
-                return sd;
-              })
-            }
+	            if(d.schemas && d.schemas.length > 0) {
+	              descriptor.schemas = d.schemas.map( s => {
+	                var sd = new SchemaDescriptor()
+	                sd.name = s.name
+	                sd.isLazy = s.lazy
+	                return sd;
+	              })
+	            }
 
-            if(d.aliases && d.aliases.length > 0 ) {
-              d.aliases.forEach((alias)=> {
-            const aliasDesc = new AliasDescriptor()
-                aliasDesc.name = alias.name
-                aliasDesc.targetDoctype = d.name
-                aliasDesc.type = alias.type
-                aliasDesc.args = new ArrayList()
-                alias.args.forEach((arg)=> aliasDesc.args.add(arg))
-                aliases.add(aliasDesc)
-              })
+	            if(d.aliases && d.aliases.length > 0 ) {
+	              d.aliases.forEach((alias)=> {
+	                const aliasDesc = new AliasDescriptor()
+	                aliasDesc.name = alias.name
+	                aliasDesc.targetDoctype = d.name
+	                aliasDesc.type = alias.type
+	                aliasDesc.args = new ArrayList()
+	                alias.args.forEach((arg)=> aliasDesc.args.add(arg))
+	                aliases.add(aliasDesc)
+	              })
 
-            }
+	            }
 
-            if(d.hasOwnProperty('crud')) {
-              var crudDesc = new CrudDescriptor()
-              crudDesc.targetDoctype = d.name
-              crud.add(crudDesc)
-            }
+	            if(d.hasOwnProperty('crud')) {
+	              var crudDesc = new CrudDescriptor()
+	              crudDesc.targetDoctype = d.name
+	              crud.add(crudDesc)
+	            }
 
 
-              doctypes.add(descriptor)
+                doctypes.add(descriptor)
 
             })
 
-            if(crud.length > 0) {
-              result.put("cruds", crud)
-            }
+            
+            result.put("cruds", crud)
             result.put("doctypes", doctypes )
             result.put("aliases", aliases )
 

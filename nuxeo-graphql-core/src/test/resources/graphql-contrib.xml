@@ -1,0 +1,10 @@
+<component name="graphql.contrib.test">
+
+
+  <extension target="org.nuxeo.graphql.component" point="crud">
+
+    <crud targetDoctype="Note" />
+
+  </extension>
+
+</component>

@@ -35,6 +35,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   var Aliases = createToken({ name: "Aliases", pattern: /aliases/ });
   var Queries = createToken({ name: "Queries", pattern: /queries/ });
   var Facets = createToken({ name: "Facets", pattern: /facets/ });
+  var Crud = createToken({ name: "Crud", pattern: /crud/ });
   var Lazy = createToken({ name: "Lazy", pattern: /lazy/ });
   var LCurly = createToken({ name: "LCurly", pattern: /{/ });
   var RCurly = createToken({ name: "RCurly", pattern: /}/ });
@@ -61,7 +62,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
     line_breaks: true
   });
 
-  var allTokens = [WhiteSpace, Comment, Comma, StringLiteral, Colon, DocType, Schemas, Facets, Aliases, Queries, Schema, Facet, Lazy, Extends, LCurly, RCurly, LParenthesis, RParenthesis, Identifier];
+  var allTokens = [WhiteSpace, Comment, Comma, StringLiteral, Colon, DocType, Schemas, Facets, Aliases, Queries, Schema, Facet, Crud, Lazy, Extends, LCurly, RCurly, LParenthesis, RParenthesis, Identifier];
 
   LCurly.LABEL = "'{'";
   RCurly.LABEL = "'}'";
@@ -114,6 +115,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                 $.SUBRULE($.facetList);
               } }, { ALT: function ALT() {
                 $.SUBRULE($.aliasList);
+              } }, { ALT: function ALT() {
+                $.CONSUME(Crud);
               } }]);
           });
           $.CONSUME1(RCurly);
@@ -370,6 +373,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
         if (ctx.aliasList.length > 0) {
           doctype.aliases = this.visit(ctx.aliasList);
+        }
+
+        if (ctx.Crud.length > 0) {
+          doctype.crud = {};
         }
 
         return doctype;

@@ -2,6 +2,7 @@ package org.nuxeo.graphql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +17,14 @@ import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 import com.google.inject.Inject;
 
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @Deploy("nuxeo.graphql")
+@LocalDeploy("nuxeo.graphql.test:graphql-contrib.xml")
 @RepositoryConfig(init = SampleRepositoryConfig.class, cleanup = Granularity.METHOD)
 public class GraphQLServiceTest {
 
@@ -92,4 +95,27 @@ public class GraphQLServiceTest {
         Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query);
         assertThat(result.get("documents")).hasSameSizeAs(session.query(nxql));
     }
+
+
+    @Test
+    public void should_be_able_to_create_doc() throws Exception {
+        String query ="mutation createNote( $note: NoteInput!) { createNote(Note: $note) { id  dc { title }  }}";
+
+        Map<String,Object> params = new HashMap<String, Object>();
+        Map<String,Object> subparams = new HashMap<String, Object>();
+
+        subparams.put("path", "/");
+        Map<String,String> dc = new HashMap<String, String>();
+        dc.put("title", "title");
+        subparams.put("dc", dc);
+        params.put("note", subparams);
+
+
+        Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query, params);
+        System.out.println(result.toString());
+
+    }
+
+
+
 }
