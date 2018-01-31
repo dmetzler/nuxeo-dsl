@@ -17,6 +17,9 @@ public class DocPropertyDataFetcher implements DataFetcher<Object> {
             } else if ("id".equals(fieldName)) {
                 return doc.getId();
             }
+            else if ("name".equals(fieldName)) {
+                return doc.getName();
+            }
         }
         return null;
     }

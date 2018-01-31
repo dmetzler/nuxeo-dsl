@@ -98,6 +98,18 @@ public class GraphQLServiceTest {
 
 
     @Test
+    public void should_be_able_to_query_notes() throws Exception {
+        DocumentModel doc = session.createDocumentModel("/","myNote","Note");
+        doc = session.createDocument(doc);
+
+        String nxql = "SELECT * FROM Note";
+        String query ="{allNote { path title}}";
+        Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query);
+        assertThat(result.get("allNote")).hasSameSizeAs(session.query(nxql));
+    }
+
+
+    @Test
     public void should_be_able_to_create_doc() throws Exception {
         String query ="mutation createNote( $note: NoteInput!) { createNote(Note: $note) { id  dc { title }  }}";
 
@@ -105,6 +117,7 @@ public class GraphQLServiceTest {
         Map<String,Object> subparams = new HashMap<String, Object>();
 
         subparams.put("path", "/");
+        subparams.put("name", "mynote");
         Map<String,String> dc = new HashMap<String, String>();
         dc.put("title", "title");
         subparams.put("dc", dc);
@@ -112,7 +125,14 @@ public class GraphQLServiceTest {
 
 
         Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query, params);
-        System.out.println(result.toString());
+
+
+
+        PathRef noteRef = new PathRef("/mynote");
+
+        assertThat(session.exists(noteRef));
+        DocumentModel note = session.getDocument(noteRef);
+        assertThat(note.getTitle()).isEqualTo("title");
 
     }
 

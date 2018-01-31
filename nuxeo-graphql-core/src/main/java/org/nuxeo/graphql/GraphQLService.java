@@ -3,6 +3,7 @@ package org.nuxeo.graphql;
 import java.util.Map;
 
 import org.nuxeo.ecm.core.api.CoreSession;
+import org.nuxeo.graphql.schema.NuxeoGQLSchemaManager;
 
 import graphql.schema.GraphQLSchema;
 
@@ -15,4 +16,6 @@ public interface GraphQLService {
     GraphQLSchema getGraphQLSchema();
 
     void registerReloadListener(SchemaReloadedListener listener);
+
+    NuxeoGQLSchemaManager getSchemaManager();
 }

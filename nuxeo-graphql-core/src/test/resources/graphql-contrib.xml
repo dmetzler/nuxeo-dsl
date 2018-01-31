@@ -1,10 +1,27 @@
 <component name="graphql.contrib.test">
 
 
-  <extension target="org.nuxeo.graphql.component" point="crud">
+	<extension target="org.nuxeo.graphql.component" point="crud">
 
-    <crud targetDoctype="Note" />
+		<crud targetDoctype="Note" />
 
-  </extension>
+	</extension>
+
+
+	<extension target="org.nuxeo.graphql.component" point="alias">
+
+		<alias name="title" targetDoctype="Note" type="prop">
+			<args>
+				<arg>dc:title</arg>
+			</args>
+		</alias>
+
+	</extension>
+
+	<extension point="query" target="org.nuxeo.graphql.component">
+		<query name="allNote" resultType="Note">
+			<nxql>SELECT * FROM Note</nxql>
+		</query>
+	</extension>
 
 </component>

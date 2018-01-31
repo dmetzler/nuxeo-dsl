@@ -20,6 +20,7 @@ import com.google.common.base.Joiner;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLSchema;
 
 public class GraphQLComponent extends DefaultComponent implements GraphQLService {
@@ -111,7 +112,8 @@ public class GraphQLComponent extends DefaultComponent implements GraphQLService
         return getSchemaManager().getNuxeoSchema();
     }
 
-    private NuxeoGQLSchemaManager getSchemaManager() {
+    @Override
+    public NuxeoGQLSchemaManager getSchemaManager() {
         if (sm == null) {
             sm = new NuxeoGQLSchemaManager(aliases, queries, cruds);
         }
