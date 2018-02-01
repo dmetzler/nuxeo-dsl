@@ -26,7 +26,9 @@ Thanks to the Nuxeo Docker image it's quite easy to run the package. Simply crea
 
 ## How to use
 
-After login at http://${DOCKER_HOST}:8080/ with *Administrator/Administrator* you end up on the Nuxeo DSL editor where you can start editing your model.
+After login at http://${DOCKER_HOST}:8080/ with *Administrator/Administrator* you end up on the Nuxeo DSL editor where you can start editing your model:
+
+<img src="images/dsl-studio.png"/>
 
 A sample domain definitions can  be defined like this:
                 
