@@ -43,11 +43,11 @@ public class GraphQLServiceTest {
     @Test
     public void should_retrieve_document_by_path() throws Exception {
         DocumentModel doc = session.getDocument(new PathRef("/default-domain/workspaces/test"));
-        String query = " {document(path:\"/default-domain/workspaces/test\") { id path }}";
+        String query = " {document(path:\"/default-domain/workspaces/test\") { _id _path }}";
 
         Map<String, Object> result = (Map<String, Object>) gql.query(session, query);
         Map<String, Object> document = (Map<String, Object>) result.get("document");
-        assertThat(document.get("id")).isEqualTo(doc.getId());
+        assertThat(document.get("_id")).isEqualTo(doc.getId());
         System.out.println(result);
     }
 
@@ -55,16 +55,16 @@ public class GraphQLServiceTest {
     @Test
     public void should_retrieve_document_by_id() throws Exception {
         DocumentModel doc = session.getDocument(new PathRef("/default-domain/workspaces/test"));
-        String query = " {document(id:\"" + doc.getId() + "\") { id path }}";
+        String query = " {document(id:\"" + doc.getId() + "\") { _id _path }}";
         Map<String, Object> result = (Map<String, Object>) gql.query(session, query);
         Map<String, Object> document = (Map<String, Object>) result.get("document");
-        assertThat(document.get("path")).isEqualTo("/default-domain/workspaces/test");
+        assertThat(document.get("_path")).isEqualTo("/default-domain/workspaces/test");
     }
 
     @Test
     public void should_be_able_to_retrieve_simple_schema_props() throws Exception {
         DocumentModel doc = session.getDocument(new PathRef("/default-domain/workspaces/test"));
-        String query = " {document(id:\"" + doc.getId() + "\") { id path ...on Workspace { dc { title}}}}";
+        String query = " {document(id:\"" + doc.getId() + "\") { _id _path ...on Workspace { dc { title}}}}";
 
 
         Map<String, Map<String,Object>> result =(Map<String, Map<String, Object>>) gql.query(session, query);
@@ -78,8 +78,8 @@ public class GraphQLServiceTest {
 
     @Test
     public void should_be_able_to_retrieve_several_docs() throws Exception {
-        String query = " {doc1: document(path:\"/default-domain\") { id path }"
-                + "doc2: document(path: \"/default-domain/workspaces/test\") { id path}}";
+        String query = " {doc1: document(path:\"/default-domain\") { _id _path }"
+                + "doc2: document(path: \"/default-domain/workspaces/test\") { _id _path}}";
 
         Map<String, Object> result = (Map<String, Object>) gql.query(session, query);
 
@@ -91,7 +91,7 @@ public class GraphQLServiceTest {
     @Test
     public void should_be_able_to_query_docs() throws Exception {
         String nxql = "SELECT * FROM Document";
-        String query ="{documents(nxql:\"" + nxql + "\") { path}}";
+        String query ="{documents(nxql:\"" + nxql + "\") { _path}}";
         Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query);
         assertThat(result.get("documents")).hasSameSizeAs(session.query(nxql));
     }
@@ -103,7 +103,7 @@ public class GraphQLServiceTest {
         doc = session.createDocument(doc);
 
         String nxql = "SELECT * FROM Note";
-        String query ="{allNote { path title}}";
+        String query ="{allNote { _path title}}";
         Map<String, List<Object>> result = (Map<String, List<Object>>) gql.query(session, query);
         assertThat(result.get("allNote")).hasSameSizeAs(session.query(nxql));
     }
@@ -111,13 +111,13 @@ public class GraphQLServiceTest {
 
     @Test
     public void should_be_able_to_create_doc() throws Exception {
-        String query ="mutation createNote( $note: NoteInput!) { createNote(Note: $note) { id  dc { title }  }}";
+        String query ="mutation createNote( $note: NoteInput!) { createNote(Note: $note) { _id  dc { title }  }}";
 
         Map<String,Object> params = new HashMap<String, Object>();
         Map<String,Object> subparams = new HashMap<String, Object>();
 
-        subparams.put("path", "/");
-        subparams.put("name", "mynote");
+        subparams.put("_path", "/");
+        subparams.put("_name", "mynote");
         Map<String,String> dc = new HashMap<String, String>();
         dc.put("title", "title");
         subparams.put("dc", dc);

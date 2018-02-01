@@ -12,12 +12,12 @@ public class DocPropertyDataFetcher implements DataFetcher<Object> {
         String fieldName = getFieldName(environment);
         if (environment.getSource() instanceof DocumentModel) {
             DocumentModel doc = (DocumentModel) environment.getSource();
-            if ("path".equals(fieldName)) {
+            if ("_path".equals(fieldName)) {
                 return doc.getPathAsString();
-            } else if ("id".equals(fieldName)) {
+            } else if ("_id".equals(fieldName)) {
                 return doc.getId();
             }
-            else if ("name".equals(fieldName)) {
+            else if ("_name".equals(fieldName)) {
                 return doc.getName();
             }
         }

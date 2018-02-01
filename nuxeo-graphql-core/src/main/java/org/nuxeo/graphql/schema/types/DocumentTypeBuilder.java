@@ -53,15 +53,15 @@ public class DocumentTypeBuilder extends GraphQLObjectType.Builder {
 
         Builder builder = newObject().name(type.getName()).withInterface(sm.getDocumentInterface());
         builder.field(newFieldDefinition().type(GraphQLString)//
-                                          .name("path")
+                                          .name("_path")
                                           .dataFetcher(new DocPropertyDataFetcher())
                                           .build())
                .field(newFieldDefinition().type(GraphQLString)//
-                                          .name("id")
+                                          .name("_id")
                                           .dataFetcher(new DocPropertyDataFetcher())
                                           .build())
                .field(newFieldDefinition().type(GraphQLString)//
-                                          .name("name")
+                                          .name("_name")
                                           .dataFetcher(new DocPropertyDataFetcher())
                                           .build());
 
@@ -95,7 +95,7 @@ public class DocumentTypeBuilder extends GraphQLObjectType.Builder {
         } else if ("query".equals(alias.type)) {
 
             if (alias.args.size() > 1) {
-                return new GraphQLList(sm.docTypeToGQLType(alias.args.get(1)));
+                return new GraphQLList(new GraphQLTypeReference(alias.args.get(1)));
             } else {
                 return new GraphQLList(new GraphQLTypeReference("document"));
             }

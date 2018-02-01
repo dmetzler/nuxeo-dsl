@@ -68,9 +68,9 @@ public class DocumentMutationDataFetcher extends AbstractDataFetcher implements 
     }
 
     private DocumentModel getOrCreateDocument(Map<String, Object> docInputMap, CoreSession session) {
-        String id = (String) docInputMap.get("id");
-        String path = (String) docInputMap.get("path");
-        String name = (String) docInputMap.get("name");
+        String id = (String) docInputMap.get("_id");
+        String path = (String) docInputMap.get("_path");
+        String name = (String) docInputMap.get("_name");
 
         switch (mode) {
         case UPDATE:

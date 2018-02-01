@@ -41,9 +41,9 @@ public class DocumentInputTypeBuilder extends GraphQLInputObjectType.Builder {
 
         Builder inputTypeBuilder = GraphQLInputObjectType.newInputObject().name(docType + "Input");
 
-        inputTypeBuilder.field(newInputObjectField().name("path").type(GraphQLString));
-        inputTypeBuilder.field(newInputObjectField().name("id").type(GraphQLString));
-        inputTypeBuilder.field(newInputObjectField().name("name").type(GraphQLString));
+        inputTypeBuilder.field(newInputObjectField().name("_path").type(GraphQLString));
+        inputTypeBuilder.field(newInputObjectField().name("_id").type(GraphQLString));
+        inputTypeBuilder.field(newInputObjectField().name("_name").type(GraphQLString));
 
         for (Schema schema : sm.getDocumentType(docType).getSchemas()) {
             String name = schema.getNamespace().hasPrefix() ? schema.getNamespace().prefix : schema.getName();

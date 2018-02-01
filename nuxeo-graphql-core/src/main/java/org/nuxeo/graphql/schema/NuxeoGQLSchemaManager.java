@@ -133,16 +133,16 @@ public class NuxeoGQLSchemaManager {
         if (documentInterface == null) {
             documentInterface = newInterface().name("document")
                                               .field(newFieldDefinition().type(GraphQLString)//
-                                                                         .name("path")
+                                                                         .name("_path")
                                                                          .dataFetcher(
                                                                                  new DocPropertyDataFetcher())
                                                                          .build())
                                               .field(newFieldDefinition().type(GraphQLString)//
-                                                                         .name("id")
+                                                                         .name("_id")
                                                                          .dataFetcher(new DocPropertyDataFetcher())
                                                                          .build())
                                               .field(newFieldDefinition().type(GraphQLString)//
-                                                                         .name("name")
+                                                                         .name("_name")
                                                                          .dataFetcher(new DocPropertyDataFetcher())
                                                                          .build())
                                               .typeResolver(getNuxeoDocumentTypeResolver())
