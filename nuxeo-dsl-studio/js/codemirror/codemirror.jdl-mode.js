@@ -1,13 +1,10 @@
 (function () {
 
-    var mainKeywords = ['entity', 'enum', 'relationship', 'paginate', 'dto', 'service', 'skipClient', 'skipServer', 'microservice', 'search', 'angularSuffix', 'filter'],
-    relationshipKws = ['OneToOne', 'OneToMany', 'ManyToOne', 'ManyToMany'],
-    validationKws = ['required', 'minlength', 'maxlength', 'min', 'max', 'minbytes', 'maxbytes', 'pattern'],
-    generalKws = ['with', 'all', 'except', 'to'],
-    paginationKws = ['pagination', 'pager', 'infinite-scroll'],
-    dtoKws = ['mapstruct'],
-    serviceKws = ['serviceClass', 'serviceImpl'],
-    searchKws = ['ElasticSearch'],
+    var mainKeywords = ['doctype', 'schema', 'queries', 'schemas', 'crud', 'aliases'],
+    propTypeKws = ['prop','query']
+    
+    //validationKws = ['required', 'minlength', 'maxlength', 'min', 'max', 'minbytes', 'maxbytes', 'pattern'],
+    
     typeKws = ['String', 'Integer', 'Long', 'BigDecimal', 'Float', 'Double', 'Boolean', 'LocalDate', 'ZonedDateTime', 'Instant', 'Blob', 'AnyBlob', 'ImageBlob'];
 
     CodeMirror.defineMode('jdl', function() {
@@ -18,8 +15,6 @@
             }
         };
 
-        // relationships
-        define('relationship', relationshipKws);
 
         // Keywords
         define('keyword', mainKeywords);
@@ -27,11 +22,9 @@
         // types
         define('attribute', typeKws);
 
+        
         // types
-        define('qualifier', validationKws);
-
-        // types
-        define('special', generalKws.concat(paginationKws, serviceKws, dtoKws, searchKws));
+        define('special', propTypeKws);
 
         function tokenBase(stream, state) {
             /*if (!stream.sol() && stream.match(/(\s*)([A-Z])/g)){
@@ -112,7 +105,7 @@
         };
 
     });
-    var keywords = mainKeywords.concat(typeKws, relationshipKws, validationKws, generalKws, paginationKws, dtoKws, serviceKws);
+    var keywords = mainKeywords.concat(typeKws, propTypeKws);
     CodeMirror.commands.autocomplete = function(cm) {
         cm.showHint({hint: CodeMirror.hint.anyword, list: keywords});
     }

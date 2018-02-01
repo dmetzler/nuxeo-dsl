@@ -3,10 +3,32 @@
 [![Build Status](https://travis-ci.org/dmetzler/nuxeo-dsl.png?branch=master)](https://travis-ci.org/dmetzler/nuxeo-dsl)
 
 
-This is a toy project to play with [Chevrotain](https://github.com/SAP/chevrotain) to create a Nuxeo Domain Specific language. The idea is to create an interpreter that creates Java descriptor thru Nashorn and an online editor with visual rendition of the domain model (UML style).
+What was a toy project to play with [Chevrotain](https://github.com/SAP/chevrotain) to create a Nuxeo Domain Specific language became a new way to customize Nuxeo using a DSL and a new way to query it with GraphQL . 
+
+The idea is to create an interpreter that creates Java descriptor thru Nashorn and an online editor with visual rendition of the domain model (UML style).
 
 
-Document types can  be defined like this:
+
+## How to build
+
+It's a regular Nuxeo project that you can build with Maven:
+
+    mvn clean install
+
+It then creates a regular Nuxeo package in `nuxeo-dsl-package/nuxeo-dsl-package-1.0-SNAPSHOT.zip` that you can install on a Nuxeo distribution. 
+
+## How to run
+
+Thanks to the Nuxeo Docker image it's quite easy to run the package. Simply create a `init` folder where you will copy the `nuxeo-dsl-package-1.0-SNAPSHOT.zip` file. After that run the following Docker command :
+
+    docker run --name nuxeo -v "$(pwd)/init":/docker-entrypoint-initnuxeo.d -p 8080:8080 --rm -ti nuxeo:9.10
+
+
+## How to use
+
+After login at http://${DOCKER_HOST}:8080/ with *Administrator/Administrator* you end up on the Nuxeo DSL editor where you can start editing your model.
+
+A sample domain definitions can  be defined like this:
                 
     doctype Library extends Folder {
     schemas {
@@ -40,15 +62,57 @@ Document types can  be defined like this:
       libraries:Library "SELECT * From Library"
     }
 
+We define here two document types `Library` and `Book` with some property aliases and a query. Click on the *Sync* button to deploy the code to Nuxeo. 
 
+The two types are now deployed to the repository and we can query it with *graphQL* thru [GraphiQL](http://localhost:8080/nuxeo/graphiql/).
 
-Some advantages of this strategy:
+    query libraries {
+      libraries {
+        _path    
+        name
+        city
+        country
+        books {
+          _path
+          title
+          author 
+          isbn
+        }
+      }  
+      
+    }
 
-  * Simpler and clearer syntax to define the model
-  * With a parser, the syntax can be checked
-  * As it's JS it can be used server side or developer side.
-  * New features like alias that could be used by the GraphQL server
-  * ...
+    mutation createLibrary{
+      createLibrary(Library:{_path:"/" _name:"ucla" lib: { city:"LosAngeles" country: "USA"} }) {
+        _id
+        _path
+        name
+      }
+    }
+
+    mutation createBook($book: BookInput!) {
+      createBook(Book: $book) {
+        _id
+        title
+        author
+        isbn      
+      }  
+    }
+
+    mutation updateBook {
+      updateBook(Book: { _path: "/ucla/us" bk: { isbn: "123456", author: "Damien"}}) {
+        _id
+        title
+        author
+        isbn
+      }
+    }
+
+    mutation deleteBook {
+      deleteBook(Book: { _path:"/ucla/us"})  
+    }
+      
+
 
 
 # TODO
@@ -64,7 +128,7 @@ Some advantages of this strategy:
  * ~~Parameterized alias and queries~~
  * ~~Mutations (basic CRUD)~~
  * React library app with Appolo
- * CodeMirror: Syntax higlighting and code completion
+ * CodeMirror: ~~Syntax higlighting~~ and code completion
 
 
 # Licensing
