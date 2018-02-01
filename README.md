@@ -6,39 +6,39 @@
 This is a toy project to play with [Chevrotain](https://github.com/SAP/chevrotain) to create a Nuxeo Domain Specific language. The idea is to create an interpreter that creates Java descriptor thru Nashorn and an online editor with visual rendition of the domain model (UML style).
 
 
-A document could be defined like this:
+Document types can  be defined like this:
                 
-        doctype Library extends Folder {
-        schemas {
-            common dublincore
-              lib:library { city, country }
-          }
-          aliases {
-            name prop {"dc:title"}
-              city prop {"lib:city"}
-              country prop {"lib:country"}
-              books query {"select * from Book where ecm:parentId='${this.id}'", "Book"}
-          }
+    doctype Library extends Folder {
+    schemas {
+        common dublincore
+          lib:library { city, country}
+      }    
+      aliases {
+        name prop {"dc:title"}
+          city prop {"lib:city"}
+          country prop {"lib:country"}        
+          books query { "select * from Book where ecm:parentId = '${this.id}'", "Book"}
       }
-       
-      doctype Book {
-        schemas {
-            common dublincore
-              bk:book { author, isbn}
-          }
-          
-          aliases {
-            title prop {"dc:title"}
-            author prop {"bk:author"}
-            isbn prop {"bk:isbn"}
-            sameAuthor query { "SELECT * FROM Book WHERE bk:author = '${this.bk.author}'"}
-          }
+      crud
+    }
+    
+    doctype Book {
+      schemas {
+        common dublincore
+          bk:book { author, isbn, pageCount integer}
       }
-      
-      queries {
-        allLibraries:Library "select * from Library" 
-          getLibrary(name):Library "select * from Library where dc:title = '${name}'" 
+      aliases {
+        title prop {"dc:title"}
+          author prop {"bk:author"}
+          isbn  prop {"bk:isbn"}
+          pageCount prop {"bk:pageCount"}
       }
+      crud
+    }
+    
+    queries {
+      libraries:Library "SELECT * From Library"
+    }
 
 
 
@@ -62,7 +62,7 @@ Some advantages of this strategy:
  * ~~Alias resolvers~~
  * ~~GraphQL schema reload on HotReload~~
  * ~~Parameterized alias and queries~~
- * Mutations (basic CRUD)
+ * ~~Mutations (basic CRUD)~~
  * React library app with Appolo
  * CodeMirror: Syntax higlighting and code completion
 
