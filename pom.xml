@@ -24,6 +24,13 @@
     <module>nuxeo-dsl-package</module>
   </modules>
 
+  <scm>
+    <connection>scm:git:git://github.com/dmetzler/nuxeo-dsl.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/dmetzler/nuxeo-dsl.git</developerConnection>
+    <url>http://nuxeo.github.io</url>
+    <tag>nuxeo-dsl-1.0</tag>
+  </scm>
+
   <repositories>
     <repository>
       <id>public</id>
