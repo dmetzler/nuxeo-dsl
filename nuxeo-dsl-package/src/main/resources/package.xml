@@ -1,6 +1,6 @@
 <!-- See documentation at http://doc.nuxeo.com/x/HgIz -->
-<package type="addon" name="nuxeo-dsl-package" version="@VERSION@">
-  <title>Nuxeo dsl package</title>
+<package type="addon" name="nuxeo-dsl" version="@VERSION@">
+  <title>Nuxeo DSL</title>
   <description>
     <p>Put here an HTML description of your Nuxeo Package.</p>
   </description>
