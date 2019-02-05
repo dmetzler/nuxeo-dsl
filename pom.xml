@@ -63,6 +63,19 @@
     </repository>
   </repositories>
 
+  <profiles>
+    <profile>
+      <id>release</id>
+      <distributionManagement>
+        <repository>
+          <id>external-releases</id>
+          <name>External Releases</name>
+          <url>${external.releases.url}</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
   <pluginRepositories>
     <pluginRepository>
       <id>public</id>
