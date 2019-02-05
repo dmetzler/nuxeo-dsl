@@ -15,11 +15,11 @@ It's a regular Nuxeo project that you can build with Maven:
 
     mvn clean install
 
-It then creates a regular Nuxeo package in `nuxeo-dsl-package/nuxeo-dsl-package-1.0-SNAPSHOT.zip` that you can install on a Nuxeo distribution. 
+It then creates a regular Nuxeo package in `nuxeo-dsl-package/nuxeo-dsl-package-1.0.zip` that you can install on a Nuxeo distribution. 
 
 ## How to run
 
-Thanks to the Nuxeo Docker image it's quite easy to run the package. Simply create a `init` folder where you will copy the `nuxeo-dsl-package-1.0-SNAPSHOT.zip` file. After that run the following Docker command :
+Thanks to the Nuxeo Docker image it's quite easy to run the package. Simply create a `init` folder where you will copy the `nuxeo-dsl-package-1.0.zip` file. After that run the following Docker command :
 
     docker run --name nuxeo -v "$(pwd)/init":/docker-entrypoint-initnuxeo.d -p 8080:8080 --rm -ti nuxeo:9.10
 
