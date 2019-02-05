@@ -8,7 +8,7 @@
 
   <groupId>org.nuxeo.dsl</groupId>
   <artifactId>nuxeo-dsl-parent</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.3-SNAPSHOT</version>
   <name>Nuxeo DSL :: parent</name>
   <description></description>
   <packaging>pom</packaging>
