@@ -43,11 +43,10 @@ gulp.task('clean',  () => {
     return del([config.dist], { dot: true })
 });
 
-gulp.task('extras', gulp.series('clean', function(done) {
+gulp.task('extras', gulp.series('clean', function() {
     gulp.src(extras, { base: '.'})
         .pipe(print())
         .pipe(gulp.dest( DIST ));
-    done();
 }));
 
 gulp.task('inject', () => {
@@ -62,9 +61,8 @@ gulp.task('inject', () => {
 });
 
 
-gulp.task('build', gulp.series('clean', 'inject','extras', (done) => {
-
-    //const manifest = gulp.src('.tmp/rev-manifest.json');
+gulp.task('build', gulp.series('clean', 'inject','extras', () => {
+    const manifest = gulp.src('.tmp/rev-manifest.json');
 
     return gulp.src('index-dev.html')
         .pipe(rename("index.html"))
@@ -79,10 +77,9 @@ gulp.task('build', gulp.series('clean', 'inject','extras', (done) => {
         .pipe(gulpIf('*.png', print()))
         .pipe(gulpIf('*.css', cssTask()))
         .pipe(gulpIf('**/*.!(html)', rev()))
-      //  .pipe(revReplace({manifest: manifest}))
+        .pipe(revReplace({manifest: manifest}))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(DIST));
-
 }));
 
 

@@ -10,11 +10,6 @@ const gulp = require("gulp"),
 
 
 
-gulp.task('test', ['build'], function () {
-    return gulp.src(['*_spec.js'], { cwd: 'src/main/js',read: false })
-        .pipe(mocha({ reporter: 'spec' }))
-        .on('error', util.log);
-});
 
 
 gulp.task('lib', function () {
@@ -22,7 +17,7 @@ gulp.task('lib', function () {
         .pipe(dest('target/generated-resources/js/lib'));
 });
 
-gulp.task('build', ['lib'],function () {
+gulp.task('build', gulp.series('lib',function () {
    return gulp.src(['nuxeo_dsl*.js'], { cwd: 'src/main/js' })
         .pipe(babel({
             presets: ['env'],
@@ -30,7 +25,13 @@ gulp.task('build', ['lib'],function () {
           ignore: '*_spec.js'}))
         .pipe(dest('target/generated-resources/js'))
         .pipe(print())
-});
+}));
+
+gulp.task('test', gulp.series('build', function () {
+    return gulp.src(['*_spec.js'], { cwd: 'src/main/js',read: false })
+        .pipe(mocha({ reporter: 'spec' }))
+        .on('error', util.log);
+}));
 
 
 gulp.task('watch', function () {
