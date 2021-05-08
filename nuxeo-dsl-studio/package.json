@@ -12,7 +12,7 @@
     "nuxeo"
   ],
   "dependencies": {
-    "lodash": "~>4.17.5",
+    "lodash": "~>4.17.21",
     "dagre": "0.4.5",
     "chevrotain": "1.0.1"
   },
